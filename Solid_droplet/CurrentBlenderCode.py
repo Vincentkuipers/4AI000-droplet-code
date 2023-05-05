@@ -83,6 +83,38 @@ lathe_geometry(bm, cent, axis, dvec, angle, steps, remove_doubles=True, dist=0.0
 bm.to_mesh(obj.data)
 # obj.data.update()   # if you want update to show immediately
 bm.free()
+
+# Add a subdivision surface modifier
+subsurf = obj.modifiers.new(name='Subdivision Surface', type='SUBSURF')
+subsurf.levels = 2  # Increase the number of subdivision levels
+
+# Create a new water material
+water_material = bpy.data.materials.new(name="Water")
+water_material.use_nodes = True
+
+# Get a reference to the Principled BSDF node in the material's node tree
+principled_bsdf_node = water_material.node_tree.nodes["Principled BSDF"]
+
+# Set the color of the material to blue
+principled_bsdf_node.inputs["Base Color"].default_value = (0.0, 0.0, 1.0, 1.0)
+
+# Set the roughness of the material to 0.1
+principled_bsdf_node.inputs["Roughness"].default_value = 0.1
+
+# Assign the water material to the object
+obj.data.materials.append(water_material)
+
+# Create a new world
+world = bpy.data.worlds.new("world")
+
+# Set the background color of the world to white
+world.use_nodes = True
+bg_node = world.node_tree.nodes.get("Background")
+bg_node.inputs[0].default_value = (1.0, 1.0, 1.0, 1.0)
+
+# Assign the world to the scene
+bpy.context.scene.world = world
+
 bpy.context.scene.frame_end = 0
 #bpy.context.scene.render.file_extension = "PNG"
 bpy.context.scene.render.filepath = f"//Data//{sigma}"

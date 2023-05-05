@@ -15,8 +15,11 @@ if not dir in sys.path:
     sys.path.append(dir )
 from fun_genSingleDrop import *
 
+sigma = int(sys.argv[-1])
+#volume = sys.argv
+#rneedle = sys.argv
 
-r_a, z_a = genSingleDrop(70, 32, 1,1 )
+r_a, z_a = genSingleDrop(sigma, 32, 1,1 )
 
 edge_points = [0] * (len(r_a)+1)
 for i in range(len(r_a)):
@@ -80,4 +83,7 @@ lathe_geometry(bm, cent, axis, dvec, angle, steps, remove_doubles=True, dist=0.0
 bm.to_mesh(obj.data)
 # obj.data.update()   # if you want update to show immediately
 bm.free()
-## bpy.ops.render.render()
+bpy.context.scene.frame_end = 0
+#bpy.context.scene.render.file_extension = "PNG"
+bpy.context.scene.render.filepath = f"//Data//{sigma}"
+bpy.ops.render.render(write_still = True)

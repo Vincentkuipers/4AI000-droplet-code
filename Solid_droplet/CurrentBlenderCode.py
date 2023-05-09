@@ -1,4 +1,4 @@
-### Import packages ###
+### Import packages and libraries
 import bpy
 import sys
 import os
@@ -10,17 +10,17 @@ import math
 import bmesh
 from bmesh.ops import spin
 
-### Clear Scene except for Light and Camera ###
+dir = os.path.dirname(bpy.data.filepath)
+if not dir in sys.path:
+    sys.path.append(dir )
+from Solid_droplet.fun_genSingleDrop import *
+
+### Clear Scene except for Light and Camera objects
 for ob in bpy.data.objects:
     if ob.name not in ["Camera","Light"]:
         bpy.data.objects[ob.name].select_set(True)
         bpy.ops.object.delete()
 
-
-dir = os.path.dirname(bpy.data.filepath)
-if not dir in sys.path:
-    sys.path.append(dir )
-from fun_genSingleDrop import *
 
 sigma = int(sys.argv[-1])
 #volume = sys.argv

@@ -1,3 +1,4 @@
+### Import packages ###
 import bpy
 import sys
 import os
@@ -8,6 +9,12 @@ import mathutils
 import math
 import bmesh
 from bmesh.ops import spin
+
+### Clear Scene except for Light and Camera ###
+for ob in bpy.data.objects:
+    if ob.name not in ["Camera","Light"]:
+        bpy.data.objects[ob.name].select_set(True)
+        bpy.ops.object.delete()
 
 
 dir = os.path.dirname(bpy.data.filepath)
@@ -119,3 +126,4 @@ bpy.context.scene.frame_end = 0
 #bpy.context.scene.render.file_extension = "PNG"
 bpy.context.scene.render.filepath = f"//Data//{sigma}"
 bpy.ops.render.render(write_still = True)
+

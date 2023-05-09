@@ -10,7 +10,7 @@ except:
 
 
 # Get code path location
-CODE_PATH = path.join(getcwd(),"Solid_droplet\\")
+CODE_PATH = getcwd()
 
 # Find droplet .blend file (test.blend)
 try:
@@ -32,7 +32,7 @@ DATA_PATH = path.join(CODE_PATH, "Data\\")
 # -f: Only a single frame (we don't need multiple, since we don't have an animation). -> set up such that only one frame is rendered.
 
 # If we have Python code implentation outside we can use this:
-sigma = 71
+sigma = 90
 system(f"{PATH_BLENDER} -b -P {BLEND_FILE_CODE} -- {sigma}")
 # -P: calls a python file
 # -- passes system arguments, needed for sigma, volume, rneedle

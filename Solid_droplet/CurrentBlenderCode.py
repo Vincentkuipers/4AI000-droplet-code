@@ -117,24 +117,24 @@ water_material.use_nodes = True
 principled_bsdf_node = water_material.node_tree.nodes["Principled BSDF"]
 
 # Set the roughness of the material to 0.05
-principled_bsdf_node.inputs["Roughness"].default_value = 0.05
+principled_bsdf_node.inputs["Roughness"].default_value = 0.2
 
 # Set the transmission to 0.5 (partial transparency)
-principled_bsdf_node.inputs['Transmission'].default_value = 0.5
+principled_bsdf_node.inputs['Transmission'].default_value = 1.0
 
 # Set the alpha to 0.5 (partial transparency)
-principled_bsdf_node.inputs['Alpha'].default_value = 0.5
+principled_bsdf_node.inputs['Alpha'].default_value = 1.0
 
 # Set the IOR to 1.33 (refractive index of water)
 principled_bsdf_node.inputs['IOR'].default_value = 1.33
 
 # Set the color of the material to white
-principled_bsdf_node.inputs["Base Color"].default_value = (0, 1.0, 1.0, 1.0)
+principled_bsdf_node.inputs["Base Color"].default_value = (0.8, 0.9, 1.0, 1.0)
 
 # Add a Glossy BSDF node to the material's node tree
 glossy_bsdf_node = water_material.node_tree.nodes.new(type='ShaderNodeBsdfGlossy')
-glossy_bsdf_node.inputs['Color'].default_value = (0, 1.0, 1.0, 1.0)
-glossy_bsdf_node.inputs['Roughness'].default_value = 0.0
+glossy_bsdf_node.inputs['Color'].default_value = (1.0, 1.0, 1.0, 1.0)
+glossy_bsdf_node.inputs['Roughness'].default_value = 0.1
 
 # Add a Mix Shader node to the material's node tree
 mix_shader_node = water_material.node_tree.nodes.new(type='ShaderNodeMixShader')
@@ -155,20 +155,6 @@ water_material.blend_method = 'BLEND'
 # Assign the water material to the object
 obj.data.materials.append(water_material)
 
-# ########## Set the path to the image file
-# bg_image_path = "C:/4AI000/Solid_droplet/TUE_background.jpg" # path.join(PATH_BLENDER_FOLDER, "TUE/background.jpg")
-
-# # Add a background node to the world
-# world = bpy.context.scene.world
-# bg_node = world.node_tree.nodes.new('ShaderNodeBackground')
-
-# # Add an image texture node
-# tex_node = world.node_tree.nodes.new('ShaderNodeTexImage')
-# tex_node.image = bpy.data.images.load(bg_image_path)
-
-# # Connect the image texture node to the background node
-# world.node_tree.links.new(tex_node.outputs[0], bg_node.inputs[0])
-
 ########## Add a new point light to the scene
 light_data = bpy.data.lights.new(name="New Light", type='POINT')
 light_obj = bpy.data.objects.new(name="New Light", object_data=light_data)
@@ -182,13 +168,14 @@ light_data.energy = 100.0
 
 ##########Get the active camera object
 camera = bpy.context.scene.camera
+
 # Print the location and rotation of the camera
-print("Camera location:", camera.location) # Camera location: begin (7.3589, -6.9258, 4.9583)>
-print("Camera rotation (Euler angles):", camera.rotation_euler) #Camera rotation (Euler angles):begin (x=1.1093, y=0.0000, z=0.8149), order='XYZ'>
+# print("Camera location:", camera.location) # Camera location: begin (7.3589, -6.9258, 4.9583)>
+# print("Camera rotation (Euler angles):", camera.rotation_euler) #Camera rotation (Euler angles):begin (x=1.1093, y=0.0000, z=0.8149), order='XYZ'>
 
 # Set the camera location and rotation
-camera.location = (7.3589,-6.9258, 4.9583)         #x, y, z are the desired location values
-camera.rotation_euler = (1.1093, 0.1, 0.8149)  # rx, ry, rz are the rotation values in radians
+camera.location = (7.3589*1.5,-6.9258*1.5, 4.9583)         #x, y, z are the desired location values
+camera.rotation_euler = (1.1093*1.25, 0, 0.8149)           # rx, ry, rz are the rotation values in radians
 
 
 bpy.context.scene.frame_end = 0

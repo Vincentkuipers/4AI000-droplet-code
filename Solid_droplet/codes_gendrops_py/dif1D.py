@@ -3,7 +3,7 @@ import numpy.matlib
 import math as m
 from scipy.linalg import toeplitz
 from scipy.special import gamma
-import scipy.sparse
+from scipy.sparse import spdiags
 
 def __init__():
    return
@@ -58,7 +58,7 @@ def fddif(N,order,pts):#Done
     t=(pts+1)/2
     t=round(t)
     # central difference in the middle
-    D=scipy.sparse.spdiags((np.ones((N,1))*W[(int(t-1))]).T,np.linspace(-t+1,t-1,2*t-1),N,N).toarray()
+    D=spdiags((np.ones((N,1))*W[(int(t-1))]).T,np.linspace(-t+1,t-1,2*t-1),N,N).toarray()
     for indd in range (0,t-1):
         D[indd,0:pts]=W[indd,:]
         D[N-indd-1,-pts-1:-1]=W[-indd,:]

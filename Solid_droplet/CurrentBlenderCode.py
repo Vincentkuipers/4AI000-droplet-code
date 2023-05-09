@@ -10,10 +10,13 @@ import math
 import bmesh
 from bmesh.ops import spin
 
-dir = os.path.dirname(bpy.data.filepath)
-if not dir in sys.path:
-    sys.path.append(dir )
-from Solid_droplet.fun_genSingleDrop import *
+# Add function directories
+TEST_DIR = os.getcwd()
+FUNC_DIR = os.path.join(TEST_DIR, "codes_gendrops_py\\")
+sys.path.insert(1, TEST_DIR) if not TEST_DIR in sys.path else print("Path exists")
+sys.path.insert(1, FUNC_DIR) if not FUNC_DIR in sys.path else print("Path exists")
+
+from fun_genSingleDrop import *
 
 ### Clear Scene except for Light and Camera objects
 for ob in bpy.data.objects:

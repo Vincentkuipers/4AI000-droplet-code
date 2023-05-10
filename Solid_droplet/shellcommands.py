@@ -17,7 +17,7 @@ except:
     raise NameError("File has not been found check if file is correct")
 
 # If we have Python code implentation outside we can use this:
-sigma = 68
+sigma = 101
 system(f"{PATH_BLENDER} -b -P {BLEND_FILE_CODE} -- {sigma}")
 # -b: background (does not open blender) -> speeds up things a ton.
 # -P: calls a python file

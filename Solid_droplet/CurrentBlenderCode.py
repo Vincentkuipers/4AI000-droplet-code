@@ -6,7 +6,7 @@ import scipy
 import matplotlib
 from mathutils import Vector
 import mathutils
-import math
+from math import pi
 import bmesh
 from bmesh.ops import spin
 
@@ -29,7 +29,7 @@ sigma = int(sys.argv[-1])
 #volume = sys.argv
 #rneedle = sys.argv
 
-r_a, z_a = genSingleDrop(sigma, 32, 1,1 )
+r_a, z_a = genSingleDrop(sigma, 32, 1,1)
 
 edge_points = [0] * (len(r_a)+1)
 for i in range(len(r_a)):
@@ -84,7 +84,7 @@ bm.from_mesh(obj.data)
 
 axis = (0,0,1)
 dvec = (0,0,0)
-angle = 2*math.pi
+angle = 2*pi
 steps = 60
 cent = obj.location
 

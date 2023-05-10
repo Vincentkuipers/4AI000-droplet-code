@@ -48,7 +48,7 @@ new_mesh.from_pydata(edge_points, edges, [])
 new_mesh.update()
 
 new_object = bpy.data.objects.new("droplet_object", new_mesh)
-bpy.context.scene.collection.objects.link(new_object)
+
 
 
 def lathe_geometry(bm, cent, axis, dvec, angle, steps, remove_doubles=True, dist=0.0001):
@@ -83,7 +83,7 @@ lathe_geometry(bm, cent, axis, dvec, angle, steps, remove_doubles=True, dist=0.0
 bm.to_mesh(obj.data)
 # obj.data.update()   # if you want update to show immediately
 bm.free()
-
+bpy.context.scene.collection.objects.link(obj)
 
 # Set the background color to blue
 # bpy.context.scene.world.node_tree.nodes['Background'].inputs[0].default_value = (0.0, 0.0, 1.0, 1.0)

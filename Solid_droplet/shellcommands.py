@@ -16,9 +16,12 @@ try:
 except:
     raise NameError("File has not been found check if file is correct")
 
-# If we have Python code implentation outside we can use this:
-sigma = 101
-system(f"{PATH_BLENDER} -b -P {BLEND_FILE_CODE} -- {sigma}")
+# note it will do sigma_min, sigma_min+1, ..., sigma_max-1 
+[sigma_min, sigma_max] = [70, 72] 
+[volume_min, volume_max] = [32, 34]
+[rneedle_min, rneedle_max] = [1,3]
+
+system(f"{PATH_BLENDER} -b -P {BLEND_FILE_CODE} -- {sigma_min} {sigma_max} {volume_min} {volume_max} {rneedle_min} {rneedle_max}")
 # -b: background (does not open blender) -> speeds up things a ton.
 # -P: calls a python file
 # -- passes system arguments, needed for sigma, volume, rneedle

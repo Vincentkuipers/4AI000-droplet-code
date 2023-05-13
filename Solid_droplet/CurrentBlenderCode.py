@@ -19,7 +19,6 @@ sys.path.insert(1, FUNC_DIR) if not FUNC_DIR in sys.path else print("Path exists
 from fun_genSingleDrop import *
 
 
-
 sigma_range = range(int(sys.argv[-6]), int(sys.argv[-5]))
 volume_range = range(int(sys.argv[-4]), int(sys.argv[-3]))
 rneedle_range = range(int(sys.argv[-2]), int(sys.argv[-1]))

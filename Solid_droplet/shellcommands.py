@@ -17,9 +17,9 @@ except:
     raise NameError("File has not been found check if file is correct")
 
 # note it will do sigma_min, sigma_min+1, ..., sigma_max-1 
-[sigma_min, sigma_max] = [70, 72] 
-[volume_min, volume_max] = [32, 34]
-[rneedle_min, rneedle_max] = [1,3]
+[sigma_min, sigma_max] = [70, 71] 
+[volume_min, volume_max] = [32, 33]
+[rneedle_min, rneedle_max] = [1,2]
 
 system(f"{PATH_BLENDER} -b -P {BLEND_FILE_CODE} -- {sigma_min} {sigma_max} {volume_min} {volume_max} {rneedle_min} {rneedle_max}")
 # -b: background (does not open blender) -> speeds up things a ton.

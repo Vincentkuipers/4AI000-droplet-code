@@ -102,7 +102,8 @@ for sigma in sigma_range:
             # Set the background color to blue
             bpy.context.scene.world.node_tree.nodes['Background'].inputs[0].default_value = (0.0, 0.0, 0.0, 1.0)
             
-            
+            ### Should be removed if not using two step ==>
+
             for ob in bpy.data.objects:
                 if ob.name in ["droplet_object"]:
                     bpy.data.objects[ob.name].select_set(True)
@@ -122,8 +123,6 @@ for sigma in sigma_range:
                     except:
                         pass
 
-
-
             # Save file
             bpy.context.scene.frame_end = 0
             bpy.context.scene.render.filepath = f"//Data//{sigma}_{volume}_{rneedle}_edgedetection"
@@ -131,6 +130,9 @@ for sigma in sigma_range:
 
             bpy.data.objects["droplet_object"].select_set(True)
             bpy.data.objects["droplet_object"].data.materials.clear()
+
+            ### <== Should be removed if we are not using to step
+
 
             # Get a reference to the world node tree
             world_node_tree = bpy.context.scene.world.node_tree

@@ -3,7 +3,7 @@ from os import listdir
 from numpy import array
 
 class DataLoader():
-    """Class for loading data"""
+    """Class for loading data and the labels"""
     def __init__(self, DATA_DIR:list, train_frac:float = 0.6, val_frac:float = 0.2, test_frac:float=0.2, use_seed:bool=False, seed_val:int=42):
         train, val, test, trainl, vall, testl = self._split_data(DATA_DIR, train_frac, val_frac, test_frac, use_seed, seed_val)
         self.train = train

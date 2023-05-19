@@ -73,14 +73,7 @@ class DataLoader():
         label = []
         
         for list_item in list:
-            [sigma, volume, rneedle] = list_item.split(".")[0].split("_")
-
-            # Store data as float instead of string
-            sigma = float(sigma)
-            volume = float(volume)
-            rneedle = float(rneedle)
-
-            # store data
+            [sigma, volume, rneedle] = [eval(i) for i in list_item.split(".")[0].split("_")] # return list of int/float instead of str
             label.append([sigma, volume, rneedle])
         
         # Store data as numpy array

@@ -25,7 +25,8 @@ for ob in bpy.data.objects:
 
 
 r_a, z_a = genSingleDrop(sigma, 32, 1,1 )
-
+print(z_a)
+print(r_a)
 edge_points = [0] * (len(r_a)+1)
 for i in range(len(r_a)):
     x = 0    
@@ -36,6 +37,72 @@ edge_points[-1] = Vector((0,0,z_a[-1]+4))
         
 edges = []
 
+################# Cylinder for needle
+# Clear existing objects
+# bpy.ops.object.select_all(action='DESELECT')
+# bpy.ops.object.select_by_type(type='MESH')
+# bpy.ops.object.delete()
+
+# Create a round cylinder
+bpy.ops.mesh.primitive_cylinder_add(vertices=256, radius=r_a[39], depth=10, location=(0, 0, 0)) 
+
+# Access the newly created cylinder object
+cylinder = bpy.context.object
+
+# Modify the cylinder's properties (optional)
+cylinder.name = "RoundCylinder"
+cylinder.location = (0, 0, (5-z_a[0]*0.5))  # uses height of the droplet and 1/2 length of the needle
+cylinder.rotation_euler = (0, 0, 0)  # Rotate by 90 degrees around Z-axis
+
+
+# # Apply Subdivision Surface modifier
+# subsurf_modifier = cylinder.modifiers.new(name="Subdivision", type='SUBSURF')
+# subsurf_modifier.levels = 1  # Adjust the number of subdivisions 
+
+# Set up material for a metal look
+material = bpy.data.materials.new(name="MetalMaterial")
+material.use_nodes = True
+cylinder.data.materials.append(material)
+
+# Access the material nodes
+nodes = material.node_tree.nodes
+
+# Clear default nodes
+for node in nodes:
+    nodes.remove(node)
+
+# Add a Principled BSDF node
+principled_bsdf = nodes.new('ShaderNodeBsdfPrincipled')
+principled_bsdf.location = 0, 300
+
+# Adjust material settings
+principled_bsdf.inputs['Base Color'].default_value = (0.8, 0.8, 0.8, 1)
+principled_bsdf.inputs['Roughness'].default_value = 0.1
+principled_bsdf.inputs['Metallic'].default_value = 1.0
+
+# Add an Output node
+output_node = nodes.new('ShaderNodeOutputMaterial')
+output_node.location = 400, 300
+
+# Connect nodes
+material.node_tree.links.new(principled_bsdf.outputs['BSDF'], output_node.inputs['Surface'])
+
+# Smooth the edges
+# cylinder.data.use_auto_smooth = True
+# cylinder.data.auto_smooth_angle = 60  # Adjust the angle threshold for smoothing
+
+# Make the cylinder hollow
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.select_all(action='SELECT')
+bpy.ops.mesh.normals_make_consistent(inside=False)
+bpy.ops.mesh.edge_face_add()
+bpy.ops.object.mode_set(mode='OBJECT')
+
+# Set the active object and select it
+bpy.context.view_layer.objects.active = cylinder
+cylinder.select_set(True)
+
+#### droplet
 #start_index = len(r_a) 
 #end_index = start_index + len(r_a) 
 #indices = list(range(start_index, end_index))
@@ -73,19 +140,19 @@ def lathe_geometry(bm, cent, axis, dvec, angle, steps, remove_doubles=True, dist
     if remove_doubles:
         bmesh.ops.remove_doubles(bm, verts=bm.verts[:], dist=dist)
 
-
+# Create new object
 obj = bpy.data.objects["droplet_object"]
 bm = bmesh.new()
 bm.from_mesh(obj.data)
 
+# Define mesh parameters
 axis = (0,0,1)
 dvec = (0,0,0)
 angle = 2*math.pi
 steps = 60
 cent =  obj.location
 
-
-
+# Call function for mesh
 lathe_geometry(bm, cent, axis, dvec, angle, steps, remove_doubles=True, dist=0.0001)
 
 bm.to_mesh(obj.data)
@@ -171,6 +238,7 @@ bpy.context.scene.frame_end = 0
 #bpy.context.scene.render.file_extension = "PNG"
 bpy.context.scene.render.filepath = f"//Data//{sigma}"
 bpy.ops.render.render(write_still = True)
+
 
 #         ### Clear Scene except for Light and Camera objects
 # for ob in bpy.data.objects:

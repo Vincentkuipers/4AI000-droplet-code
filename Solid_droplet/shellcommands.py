@@ -11,6 +11,7 @@ except:
 # Find code file
 try:
     CODE_PATH = getcwd()
+    BLEND_BLEND_FILE = path.join(CODE_PATH, "empty.blend")
     BLEND_FILE_CODE = path.join(CODE_PATH, "CurrentBlenderCode.py")
     print("Files were found")
 except:
@@ -21,7 +22,7 @@ except:
 [volume_min, volume_max] = [32, 33]
 [rneedle_min, rneedle_max] = [1,2]
 
-system(f"{PATH_BLENDER} -b -P {BLEND_FILE_CODE} -- {sigma_min} {sigma_max} {volume_min} {volume_max} {rneedle_min} {rneedle_max}")
+system(f"{PATH_BLENDER} -b {BLEND_BLEND_FILE} -P {BLEND_FILE_CODE} -- {sigma_min} {sigma_max} {volume_min} {volume_max} {rneedle_min} {rneedle_max}")
 # -b: background (does not open blender) -> speeds up things a ton.
 # -P: calls a python file
 # -- passes system arguments, needed for sigma, volume, rneedle

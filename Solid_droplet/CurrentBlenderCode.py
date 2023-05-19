@@ -18,7 +18,6 @@ sys.path.insert(1, FUNC_DIR) if not FUNC_DIR in sys.path else print("Path exists
 
 from fun_genSingleDrop import *
 
-
 sigma_range = range(int(sys.argv[-6]), int(sys.argv[-5]))
 volume_range = range(int(sys.argv[-4]), int(sys.argv[-3]))
 rneedle_range = range(int(sys.argv[-2]), int(sys.argv[-1]))
@@ -29,7 +28,7 @@ for sigma in sigma_range:
 
             ### Clear Scene except for Light and Camera objects
             for ob in bpy.data.objects:
-                if ob.name not in ["Camera","Light"]:
+                if ob.name not in ["Camera","Light",""]:
                     bpy.data.objects[ob.name].select_set(True)
                     bpy.ops.object.delete()
 
@@ -40,7 +39,7 @@ for sigma in sigma_range:
             for i in range(len(r_a)):
                 x = 0    
                 r = r_a[i]    
-                z = z_a[i] +4
+                z = z_a[i] + 4
                 edge_points[i] = Vector((x,r,z))
             edge_points[-1] = Vector((0,0,z_a[-1]+4))
                     
@@ -101,7 +100,38 @@ for sigma in sigma_range:
             bpy.context.scene.collection.objects.link(obj)
 
             # Set the background color to blue
-            # bpy.context.scene.world.node_tree.nodes['Background'].inputs[0].default_value = (0.0, 0.0, 1.0, 1.0)
+            bpy.context.scene.world.node_tree.nodes['Background'].inputs[0].default_value = (0.0, 0.0, 0.0, 1.0)
+            
+            
+            for ob in bpy.data.objects:
+                if ob.name in ["droplet_object"]:
+                    bpy.data.objects[ob.name].select_set(True)
+                    if ob.data.materials:
+                        idx = ob.active_material_index
+                        ob.material_slots[idx].material = bpy.data.materials.get("DropletEmission")
+                    else:
+                        ob.data.materials.append(bpy.data.materials.get("DropletEmission"))
+                if ob.name in ["needle_object"]:
+                    try:
+                        bpy.data.objects[ob.name].select_set(True)
+                        if ob.data.materials:
+                            idx = ob.active_material_index
+                            ob.material_slots[idx].material = bpy.data.materials.get("BackgroundEmission")
+                        else:
+                            ob.data.materials.append(bpy.data.materials.get("BackgroundEmission"))
+                    except:
+                        pass
+
+
+
+            # Save file
+            bpy.context.scene.frame_end = 0
+            bpy.context.scene.render.filepath = f"//Data//{sigma}_{volume}_{rneedle}_edgedetection"
+            bpy.ops.render.render(write_still = True)
+
+            bpy.data.objects["droplet_object"].select_set(True)
+            bpy.data.objects["droplet_object"].data.materials.clear()
+
             # Get a reference to the world node tree
             world_node_tree = bpy.context.scene.world.node_tree
 

@@ -11,9 +11,9 @@ class Model(nn.Module):
         self.cnn4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=5, padding=2, device=device, dtype=dtype)
         self.max2 = nn.MaxPool2d(kernel_size=(2,2))
         self.flat = nn.Flatten()
-        self.lay1 = nn.Linear(3136, 1024, device=device, dtype=dtype).double()
+        self.lay1 = nn.Linear(3136, 1024, device=device, dtype=dtype)
         self.relu = nn.ReLU()
-        self.lay2 = nn.Linear(1024, 3, device=device, dtype=dtype).double()
+        self.lay2 = nn.Linear(1024, 3, device=device, dtype=dtype)
     
     def forward(self, x):
         """Forward pass of the model"""

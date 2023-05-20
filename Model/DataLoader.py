@@ -1,7 +1,7 @@
 from cv2 import imread, resize, cvtColor, COLOR_BGR2GRAY
 from random import seed, shuffle
-from numpy import array, float32
-from torch import tensor
+from numpy import array, float16, append, zeros
+from torch import tensor, float32
 from os import listdir, path
 
 class DataLoader():
@@ -24,9 +24,9 @@ class DataLoader():
 
     def _load_images(self, train_split, val_split, test_split, DATA_DIR:str):
         """Load images from DATA_DIR"""
-        train_images = tensor(self._get_images(train_split, DATA_DIR))
-        val_images = tensor(self._get_images(val_split, DATA_DIR))
-        test_images = tensor(self._get_images(test_split, DATA_DIR))
+        train_images = tensor(self._get_images(train_split, DATA_DIR), dtype=float32)
+        val_images = tensor(self._get_images(val_split, DATA_DIR), dtype=float32)
+        test_images = tensor(self._get_images(test_split, DATA_DIR), dtype=float32)
         return train_images, val_images, test_images
     
 
@@ -91,20 +91,21 @@ class DataLoader():
     
     def _image_normalize(self, image):
         """Normalize image"""
-        return image.astype(float32)/255.0
+        return image.astype(float16)/255.0
     
-    def _image_processing(self, image):
+    def _image_processing(self, image, size=(320,256)):
         """Process image"""
-        image = self._image_resize(image)
+        image = self._image_resize(image, size=size)
         image = self._image_color(image)
         image = self._image_normalize(image)
         return image
 
-    def _get_images(self, list_of_labels:list, DATA_DIR:str):
+    def _get_images(self, list_of_labels:list, DATA_DIR:str, size = (320,256)):
         """Get images from list"""
-        images = []
+        images = zeros(shape=(1, size[0], size[1]))
         for filename in list_of_labels:
             image = imread(path.join(DATA_DIR, filename))
-            image = self._image_processing(image)
-            images.append(image)
+            image = self._image_processing(image, size=size)
+            image = image.reshape(1, image.shape[0], image.shape[1])
+            append(images, image)
         return images

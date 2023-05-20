@@ -1,9 +1,10 @@
 from torch.nn import Module, MSELoss
-from torch.cuda import is_available 
+from torch.cuda import is_available, get_device_name
 from torch.optim import Adam
-from torch import device, save, tensor
+from torch import device, save, tensor, no_grad
 from sys import stdout
 from tqdm import tqdm
+from os.path import join
 
 class Trainer:
     def __init__(self, model:Module, im_train:tensor, im_val:tensor, im_test:tensor, train_labels:tensor, val_labels:tensor, test_labels:tensor) -> None:
@@ -18,7 +19,7 @@ class Trainer:
                 test_labels:tensor = The test labels
         """
         self.device = device("cuda" if is_available() else "cpu")
-        print(self.device)
+        print(f"The device that will be used in training is {get_device_name(self.device)}")
 
         self.model = model.to(self.device)
 
@@ -69,15 +70,15 @@ class Trainer:
         return loss, accuracy
     
 
-    def val_epoch(self) -> None:
+    def val_epoch(self, epochs:int) -> None:
         """Validate the model on the validation set"""
         self.model.eval()
         val_loss= []
         val_accuracy= []
 
         stdout.flush()
-        with torch.no_grad(), tqdm(total=epochs, desc="Epochs") as pbar:
-            for inputs in val_data:
+        with no_grad(), tqdm(total=epochs, desc="Epochs") as pbar:
+            for inputs in self.val_data:
                 # Send everything to device
                 inputs = self.val
                 inputs.required_grad = True
@@ -90,7 +91,7 @@ class Trainer:
                 loss = self.criteria(outputs, self.val_labels)
 
                 val_loss.append(loss.item())
-                val_accuracy.append(torch.nn.MSELoss(outputs, val_labels))
+                val_accuracy.append(MSELoss(outputs, self.val_labels))
 
                 pbar.update(1)
             
@@ -106,6 +107,6 @@ class Trainer:
     
     def save_model(self, model_name:str, DIR:str):
         """Save the model"""
-        store_path = path.join(DIR, model_name)
+        store_path = join(DIR, model_name)
         
         save(self.model.state_dict(), store_path)

@@ -1,6 +1,7 @@
 from cv2 import imread, resize, cvtColor, COLOR_BGR2GRAY
 from random import seed, shuffle
 from numpy import array, float32
+from torch import tensor
 from os import listdir, path
 
 class DataLoader():
@@ -23,9 +24,9 @@ class DataLoader():
 
     def _load_images(self, train_split, val_split, test_split, DATA_DIR:str):
         """Load images from DATA_DIR"""
-        train_images = self._get_images(train_split, DATA_DIR)
-        val_images = self._get_images(val_split, DATA_DIR)
-        test_images = self._get_images(test_split, DATA_DIR)
+        train_images = tensor(self._get_images(train_split, DATA_DIR))
+        val_images = tensor(self._get_images(val_split, DATA_DIR))
+        test_images = tensor(self._get_images(test_split, DATA_DIR))
         return train_images, val_images, test_images
     
 
@@ -61,9 +62,9 @@ class DataLoader():
         test_split = list_of_labels[train_value+val_value:]
 
         # Get labels
-        train_labels = self._get_labels(train_split)
-        val_labels = self._get_labels(val_split)
-        test_labels = self._get_labels(test_split)
+        train_labels = tensor(self._get_labels(train_split))
+        val_labels = tensor(self._get_labels(val_split))
+        test_labels = tensor(self._get_labels(test_split))
 
         return train_split, val_split, test_split, train_labels, val_labels, test_labels
 
@@ -86,7 +87,7 @@ class DataLoader():
 
     def _image_color(self, image):
         """Convert image from RGB to GRAY"""
-        return cvtColor(image, COLOR_BGR2GRAY)
+        return cvtColor(image, COLOR_BGR2GRAY).transpose(1,0)
     
     def _image_normalize(self, image):
         """Normalize image"""

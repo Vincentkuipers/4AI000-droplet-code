@@ -80,7 +80,7 @@ class Trainer:
         with no_grad(), tqdm(total=epochs, desc="Epochs") as pbar:
             for inputs in self.val_data:
                 # Send everything to device
-                inputs = self.val
+                inputs = self.val.to(self.device)
                 inputs.required_grad = True
                 self.val_labels.to(self.device)
 

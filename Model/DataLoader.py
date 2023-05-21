@@ -1,12 +1,13 @@
 from cv2 import imread, resize, cvtColor, COLOR_BGR2GRAY
 from random import seed, shuffle
-from numpy import array, float16, append, zeros
-from torch import tensor, float32
+from numpy import array, float16
+from torch import tensor, float32, empty, unsqueeze, permute
 from os import listdir, path
 
 class DataLoader():
     """Class for loading images and the labels"""
-    def __init__(self, DATA_DIR:list, train_frac:float = 0.6, val_frac:float = 0.2, test_frac:float=0.2, use_seed:bool=False, seed_val:int=42):
+    def __init__(self, DATA_DIR:list, device:str, train_frac:float = 0.6, val_frac:float = 0.2, test_frac:float=0.2, use_seed:bool=False, seed_val:int=42):
+        self.device = device
         # Split the data into train, validation and test set
         train, val, test, trainl, vall, testl = self._split_data(DATA_DIR, train_frac, val_frac, test_frac, use_seed, seed_val)
         
@@ -24,9 +25,9 @@ class DataLoader():
 
     def _load_images(self, train_split, val_split, test_split, DATA_DIR:str):
         """Load images from DATA_DIR"""
-        train_images = tensor(self._get_images(train_split, DATA_DIR), dtype=float32)
-        val_images = tensor(self._get_images(val_split, DATA_DIR), dtype=float32)
-        test_images = tensor(self._get_images(test_split, DATA_DIR), dtype=float32)
+        train_images = self._get_images(train_split, DATA_DIR)
+        val_images = self._get_images(val_split, DATA_DIR)
+        test_images = self._get_images(test_split, DATA_DIR)
         return train_images, val_images, test_images
     
 
@@ -100,12 +101,14 @@ class DataLoader():
         image = self._image_normalize(image)
         return image
 
-    def _get_images(self, list_of_labels:list, DATA_DIR:str, size = (320,256)):
+    def _get_images(self, list_of_labels:list, DATA_DIR:str, im_size:tuple[int,...] = (320,256)):
         """Get images from list"""
-        images = zeros(shape=(1, size[0], size[1]))
-        for filename in list_of_labels:
+        
+        images = empty(im_size[0], im_size[1], 1, len(list_of_labels), device = self.device, dtype = float32)
+        
+        for i, filename in enumerate(list_of_labels):
             image = imread(path.join(DATA_DIR, filename))
-            image = self._image_processing(image, size=size)
-            image = image.reshape(1, image.shape[0], image.shape[1])
-            append(images, image)
-        return images
+            image = tensor(self._image_processing(image, size=im_size))
+            images[:,:,:,i] = unsqueeze(image, 2)
+        
+        return permute(images, (3,2,0,1)) # (320, 256, 1, N) -> (N, 1, 320, 256)

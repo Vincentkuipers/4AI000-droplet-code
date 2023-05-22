@@ -1,34 +1,13 @@
 from cv2 import imread, resize, cvtColor, COLOR_BGR2GRAY
 from random import seed, shuffle
-from numpy import array, float16
-from torch import float32, empty#, tensor
+from numpy import array, float16, empty, float32
 from os import listdir, path
-from torch.utils.data import Dataset
-from torchvision import transforms
 
-data_transforms = transforms.Compose([transforms.ToTensor(), transforms.Normalize([0.5], [0.5])])
-
-class CustomImageDataset(Dataset):
-    """Custom dataset for loading images and labels"""
-    def __init__(self, images, labels, transform = None):
-        self.images = images
-        self.labels = labels
-        self.transform = transform
-    
-    def __getitem__(self, idx):
-        label = self.labels[idx]
-        image = self.images[idx]
-        #image = self.transform(array(image))
-        return image, label
-    
-    def __len__(self):
-        return len(self.labels)
 
 
 class DataSpliter():
     """Class for loading images and the labels"""
-    def __init__(self, DATA_DIR:list, device:str, train_frac:float = 0.6, val_frac:float = 0.2, test_frac:float=0.2, use_seed:bool=False, seed_val:int=42):
-        self.device = device
+    def __init__(self, DATA_DIR:list, train_frac:float = 0.6, val_frac:float = 0.2, test_frac:float=0.2, use_seed:bool=False, seed_val:int=42):
         # Split the data into train, validation and test set
         train, val, test, trainl, vall, testl = self._split_data(DATA_DIR, train_frac, val_frac, test_frac, use_seed, seed_val)
         
@@ -36,9 +15,9 @@ class DataSpliter():
         train, val, test = self._load_images(train, val, test, DATA_DIR)
 
         # Store data
-        self.train = train
-        self.val = val
-        self.test = test
+        self.train = train.reshape(train.shape[0],train.shape[1],train.shape[2],1)
+        self.val = val.reshape(val.shape[0],val.shape[1],val.shape[2],1)
+        self.test = test.reshape(test.shape[0],test.shape[1],test.shape[2],1)
         self.train_label = trainl
         self.val_label = vall
         self.test_label = testl
@@ -115,21 +94,21 @@ class DataSpliter():
         """Normalize image"""
         return image.astype(float16)/255.0
     
-    def _image_processing(self, image, size=(320,256)):
+    def _image_processing(self, image, size=(256,256)):
         """Process image"""
         image = self._image_resize(image, size=size)
         image = self._image_color(image)
         image = self._image_normalize(image)
         return image
 
-    def _get_images(self, list_of_labels:list, DATA_DIR:str, im_size:tuple[int,...] = (320,256)):
+    def _get_images(self, list_of_labels:list, DATA_DIR:str, im_size:tuple[int,...] = (256,256)):
         """Get images from list"""
         
-        images = empty(len(list_of_labels),im_size[0], im_size[1], device = self.device, dtype = float32)
+        images = empty(shape=(len(list_of_labels),im_size[0], im_size[1]))
         
         for i, filename in enumerate(list_of_labels):
             image = imread(path.join(DATA_DIR, filename))
             image = self._image_processing(image, size=im_size)
             images[i,:,:] = image
         
-        return images #permute(images, (3,2,0,1)) # (320, 256, 1, N) -> (N, 1, 320, 256)
+        return images #permute(images, (3,2,0,1)) 

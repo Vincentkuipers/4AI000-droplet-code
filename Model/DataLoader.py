@@ -3,8 +3,29 @@ from random import seed, shuffle
 from numpy import array, float16
 from torch import tensor, float32, empty, unsqueeze, permute
 from os import listdir, path
+from torch.utils.data import Dataset, DataLoader
+from torchvision import transforms
 
-class DataLoader():
+data_transforms = transforms.Compose([transforms.ToTensor(), transforms.Normalize([0.5], [0.5])])
+
+class CustomImageDataset(Dataset):
+    """Custom dataset for loading images and labels"""
+    def __init__(self, images, labels, transform = None):
+        self.images = images
+        self.labels = labels
+        self.transform = transform
+    
+    def __getitem__(self, idx):
+        label = self.labels[idx]
+        image = self.images[idx]
+        image = self.transform(array(image))
+        return image, label
+    
+    def __len__(self):
+        return len(self.labels)
+
+
+class DataSpliter():
     """Class for loading images and the labels"""
     def __init__(self, DATA_DIR:list, device:str, train_frac:float = 0.6, val_frac:float = 0.2, test_frac:float=0.2, use_seed:bool=False, seed_val:int=42):
         self.device = device

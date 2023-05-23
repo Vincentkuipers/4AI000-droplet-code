@@ -9,6 +9,7 @@ import mathutils
 from math import pi
 import bmesh
 from bmesh.ops import spin
+import numpy as np
 
 # Add function directories
 TEST_DIR = os.getcwd()
@@ -18,9 +19,9 @@ sys.path.insert(1, FUNC_DIR) if not FUNC_DIR in sys.path else print("Path exists
 
 from fun_genSingleDrop import *
 
-sigma_range = range(int(sys.argv[-6]), int(sys.argv[-5]))
-volume_range = range(int(sys.argv[-4]), int(sys.argv[-3]))
-rneedle_range = range(int(sys.argv[-2]), int(sys.argv[-1]))
+sigma_range = np.arange(int(sys.argv[-9]), int(sys.argv[-8]), float(sys.argv[-7]))
+volume_range = np.arange(int(sys.argv[-6]), int(sys.argv[-5]), float(sys.argv[-4]))
+rneedle_range = np.arange(int(sys.argv[-3]), int(sys.argv[-2]), float(sys.argv[-1]))
 
 for sigma in sigma_range:
     for volume in volume_range:

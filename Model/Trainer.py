@@ -1,15 +1,19 @@
-from torch.nn import Module, MSELoss
 from torch.cuda import is_available, get_device_name
-from torch.optim import Adam
-from torch import device, save, tensor, no_grad
+from torch.nn.utils import clip_grad_value_
+from torch import device, save, no_grad
 from torch.utils.data import DataLoader
-from sys import stdout
-from tqdm import tqdm
-from os.path import join
+from torch.nn import Module, MSELoss
+from torch.optim import Adam
 from pandas import DataFrame
+from os.path import join
+from sys import stdout
+from os import getcwd
+from tqdm import tqdm
+
+
 
 class Trainer:
-    def __init__(self, model:Module, dltrain:DataLoader, dlval:DataLoader, dltest:DataLoader) -> None:
+    def __init__(self, model:Module, dltrain:DataLoader, dlval:DataLoader, dltest:DataLoader, learning_rate:float=0.001) -> None:
         """Initialize the Trainer class
             params:
                 model: The model to train
@@ -20,78 +24,111 @@ class Trainer:
         self.device = device("cuda" if is_available() else "cpu")
         print(f"The device that will be used in training is {get_device_name(self.device)}")
 
-        self.model = model.to(self.device)
+        self.model = model.to(self.device).float()
 
         self.train = dltrain
         self.val = dlval
         self.test = dltest
 
-        self.optimizer = Adam(self.model.parameters())
-        self.criteria = MSELoss()
+        self.optimizer = Adam(self.model.parameters(), lr=learning_rate)
+        self.criterion = MSELoss()
 
-        assert self.criteria is not None, "Please define a loss function"
+        assert self.criterion is not None, "Please define a loss function"
         assert self.optimizer is not None, "Please define an optimizer"
+    
+    def train_epoch(self, dl:DataLoader):
+        # Put the model in training mode
+        self.model.train().float()
 
-    def train_epochs(self, epochs:int) -> None:
-        """Train the model for a number of epochs"""
-        self.model.train()
-        loss_list = []
-        accuracy = []
+    # Store each step's accuracy and loss for this epoch
+        epoch_metrics = {
+            "loss": [],
+        }
 
+        # Create a progress bar using TQDM
         stdout.flush()
-        with tqdm(total=epochs, desc="Epochs") as pbar:
-            for inputs in self.train:
-                # Zero grad for previous step
+        with tqdm(total=len(dl), desc=f'Training') as pbar:
+            # Iterate over the training dataset
+            for inputs, truths in dl:
+                # Zero the gradients from the previous step
                 self.optimizer.zero_grad()
 
-                # Send everything to device
-                inputs = inputs.to(self.device)
-                inputs.required_grad = True
+                # Move the inputs and truths to the target device
+                inputs = inputs.to(device=self.device)
+                inputs.required_grad = True  # Fix for older PyTorch versions
+                truths = truths.to(device=self.device)
 
-                # run model on the inputs
-                outputs = self.model(inputs)
+                # Run model on the inputs
+                output = self.model(inputs)
 
                 # Perform backpropagation
-                loss = self.criteria(outputs, self.train_labels)
+                loss = self.criterion(output, truths)
                 loss.backward()
+                clip_grad_value_(self.model.parameters(), 0.1)
                 self.optimizer.step()
 
-                loss_list.append(loss.item())
-                accuracy.append(MSELoss(outputs, self.train_labels))
+                # Store the metrics of this step
+                step_metrics = {
+                    'loss': loss.item(),
+                }
 
-                pbar.update(1)
-            
+                # Update the progress bar
+                pbar.set_postfix(**step_metrics)
+                pbar.update(list(inputs.shape)[0])
+
+                # Add to epoch's metrics
+                for k,v in step_metrics.items():
+                    epoch_metrics[k].append(v)
+
         stdout.flush()
-        return loss, accuracy
-    
 
-    def val_epoch(self, epochs:int) -> None:
-        """Validate the model on the validation set"""
+        # Return metrics
+        return epoch_metrics
+
+    def val_epoch(self, dl:DataLoader):
+        # Put the model in evaluation mode
         self.model.eval()
-        val_loss= []
-        val_accuracy= []
 
+        # Store the total loss and accuracy over the epoch
+        amount = 0
+        total_loss = 0
+
+
+        # Create a progress bar using TQDM
         stdout.flush()
-        with no_grad(), tqdm(total=epochs, desc="Epochs") as pbar:
-            for inputs in self.val_data:
-                # Send everything to device
-                inputs = self.val.to(self.device)
-                inputs.required_grad = True
-                self.val_labels.to(self.device)
+        with no_grad(), tqdm(dl, desc=f'Validation') as pbar:
+            # Iterate over the validation dataloader
+            for inputs, truths in dl:
+                 # Move the inputs and truths to the target device
+                inputs = inputs.to(device=self.device)
+                inputs.required_grad = True  # Fix for older PyTorch versions
+                truths = truths.to(device=self.device)
 
-                # run model on the inputs
-                outputs = self.model(inputs)
+                # Run model on the inputs
+                output = self.model(inputs)
+                loss = self.criterion(output, truths)
 
-                # Perform backpropagation
-                loss = self.criteria(outputs, self.val_labels)
+                # Store the metrics of this step
+                step_metrics = {
+                    'loss': loss.item(),
+                }
 
-                val_loss.append(loss.item())
-                val_accuracy.append(MSELoss(outputs, self.val_labels))
+                # Update the progress bar
+                pbar.set_postfix(**step_metrics)
+                pbar.update(list(inputs.shape)[0])
 
-                pbar.update(1)
-            
+                amount += 1
+                total_loss += step_metrics["loss"]
         stdout.flush()
-        return val_loss, val_accuracy
+
+        # Print mean of metrics
+        total_loss /= amount
+        print(f'Validation loss is {total_loss/amount}')
+
+        # Return mean loss and accuracy
+        return {
+            "loss": [total_loss],
+        }
     
     # def fit(self, epochs:int):
     #     for epoch in range(1, epochs+1):
@@ -100,7 +137,7 @@ class Trainer:
     #         print(f"Epoch: {epoch} | Train Loss: {metrics_train['loss'][-1]} | Val Loss: {metrics_val['val_loss'][-1]}")
     #     return metrics_train, metrics_val
     
-    def save_model(self, model_name:str, DIR:str):
+    def save_model(self, model_name:str, DIR:str=getcwd()):
         """Save the model"""
         store_path = join(DIR, model_name)
         
@@ -119,11 +156,12 @@ class Trainer:
         # Train the model for the provided amount of epochs
         for epoch in range(1, epochs+1):
             print(f'Epoch {epoch}')
-            metrics_train = self.train_epochs(iter(dl_train)._next_data())
+            metrics_train = self.train_epoch(dl_train)
             df_train = df_train.append(DataFrame({'epoch': [epoch for _ in range(len(metrics_train["loss"]))], **metrics_train}), ignore_index=True)
 
-            metrics_val = self.val_epoch(iter(dl_val)._next_data())
+            metrics_val = self.val_epoch(dl_val)
             df_val = df_val.append(DataFrame({'epoch': [epoch], **metrics_val}), ignore_index=True)
 
+        df_train.to_csv('savefolderpytorch\\train.csv')
+        df_val.to_csv('savefolderpytorch\\val.csv')
         # Return a dataframe that logs the training process. This can be exported to a CSV or plotted directly.
-        return df_train, df_val

@@ -28,16 +28,14 @@ rneedle_range = np.arange(int(sys.argv[-3]), int(sys.argv[-2]), float(sys.argv[-
 for sigma in sigma_range:
     for volume in volume_range:
         for rneedle in rneedle_range:
-
             for ob in bpy.data.objects:
                 if ob.name in ["droplet_object", "RoundCylinder"]:
                     bpy.data.objects[ob.name].select_set(True)
                     bpy.ops.object.delete()
-
-
+        
             r_a, z_a = genSingleDrop(sigma, 32, 1,1 )
-
             edge_points = [0] * (len(r_a)+1)
+
             for i in range(len(r_a)):
                 x = 0    
                 r = r_a[i]    
@@ -47,12 +45,7 @@ for sigma in sigma_range:
                     
             edges = []
 
-            ################# Cylinder for needle
-            # Clear existing objects
-            # bpy.ops.object.select_all(action='DESELECT')
-            # bpy.ops.object.select_by_type(type='MESH')
-            # bpy.ops.object.delete()
-
+            ############### Cylinder for needle
             # Create a round cylinder
             bpy.ops.mesh.primitive_cylinder_add(vertices=256, radius=r_a[39], depth=10, location=(0, 0, 0)) 
 
@@ -63,11 +56,6 @@ for sigma in sigma_range:
             cylinder.name = "RoundCylinder"
             cylinder.location = (0, 0, (5-z_a[0]*0.5))  # uses height of the droplet and 1/2 length of the needle
             cylinder.rotation_euler = (0, 0, 0)  # Rotate by 90 degrees around Z-axis
-
-
-            # # Apply Subdivision Surface modifier
-            # subsurf_modifier = cylinder.modifiers.new(name="Subdivision", type='SUBSURF')
-            # subsurf_modifier.levels = 1  # Adjust the number of subdivisions 
 
             # Set up material for a metal look
             material = bpy.data.materials.new(name="MetalMaterial")
@@ -97,10 +85,6 @@ for sigma in sigma_range:
             # Connect nodes
             material.node_tree.links.new(principled_bsdf.outputs['BSDF'], output_node.inputs['Surface'])
 
-            # Smooth the edges
-            # cylinder.data.use_auto_smooth = True
-            # cylinder.data.auto_smooth_angle = 60  # Adjust the angle threshold for smoothing
-
             # Make the cylinder hollow
             bpy.ops.object.mode_set(mode='EDIT')
             bpy.ops.mesh.select_all(action='SELECT')
@@ -113,10 +97,6 @@ for sigma in sigma_range:
             cylinder.select_set(True)
 
             #### droplet
-            #start_index = len(r_a) 
-            #end_index = start_index + len(r_a) 
-            #indices = list(range(start_index, end_index))
-
             # Define the faces for this slice
             for i in range(len(edge_points)-1):
                 a = i
@@ -129,6 +109,9 @@ for sigma in sigma_range:
             new_mesh.from_pydata(edge_points, edges, [])
             new_mesh.update()
 
+            # Smooth shading
+            for polygon in new_mesh.polygons:
+                polygon.use_smooth = True
 
             new_object = bpy.data.objects.new("droplet_object", new_mesh)
             bpy.context.scene.collection.objects.link(new_object)
@@ -165,12 +148,14 @@ for sigma in sigma_range:
             # Call function for mesh
             lathe_geometry(bm, cent, axis, dvec, angle, steps, remove_doubles=True, dist=0.0001)
 
+            # Smooth shading
+            for face in bm.faces:
+                face.smooth = True
             bm.to_mesh(obj.data)
+
             # obj.data.update()   # if you want update to show immediately
             bm.free()
 
-            # Set the background color to blue
-            # bpy.context.scene.world.node_tree.nodes['Background'].inputs[0].default_value = (0.0, 0.0, 1.0, 1.0)
             # Get a reference to the world node tree
             world_node_tree = bpy.context.scene.world.node_tree
 
@@ -178,8 +163,7 @@ for sigma in sigma_range:
             environment_texture_node = world_node_tree.nodes.new(type='ShaderNodeTexEnvironment')
 
             # Load the background image
-            background_path = os.path.join(dir, 'scythian_tombs_2_4k.exr')
-            background_image = bpy.data.images.load(background_path)
+            background_image = bpy.data.images.load('C:/4AI000/Solid_droplet/scythian_tombs_2_4k.exr')
 
             # Set the image as the texture for the Environment Texture node
             environment_texture_node.image = background_image
@@ -189,10 +173,9 @@ for sigma in sigma_range:
             world_node_tree.links.new(environment_texture_node.outputs['Color'], background_node.inputs['Color'])
 
 
-            # Add a subdivision surface modifier
+            # # Add a subdivision surface modifier
             subsurf = obj.modifiers.new(name='Subdivision Surface', type='SUBSURF')
             subsurf.levels = 2 # Increase the number of subdivision levels
-
 
             # Create a new water material
             water_material = bpy.data.materials.new(name="Water")
@@ -202,7 +185,7 @@ for sigma in sigma_range:
             principled_bsdf_node = water_material.node_tree.nodes["Principled BSDF"]
 
             # Set the roughness of the material to 0.2
-            principled_bsdf_node.inputs["Roughness"].default_value = 0.2
+            principled_bsdf_node.inputs["Roughness"].default_value = 0
 
             # Set the transmission to 1.0 (full transparency)
             principled_bsdf_node.inputs['Transmission'].default_value = 1.0
@@ -241,16 +224,8 @@ for sigma in sigma_range:
             camera.location = (7.3589*1.5,-6.9258*1.5, 4.9583)         #x, y, z are the desired location values
             camera.rotation_euler = (1.1093*1.25, 0, 0.8149*1.2)           # rx, ry, rz are the rotation values in radians
 
-
             bpy.context.scene.frame_end = 0
             #bpy.context.scene.render.file_extension = "PNG"
             bpy.context.scene.render.filepath = f"//Data//{sigma}_{volume}_{rneedle}"
             bpy.ops.render.render(write_still = True)
-
-
-            #         ### Clear Scene except for Light and Camera objects
-            # for ob in bpy.data.objects:
-            #     if ob.name not in ["Camera","Light"]:
-            #         bpy.data.objects[ob.name].select_set(True)
-            #         bpy.ops.object.delete()
 

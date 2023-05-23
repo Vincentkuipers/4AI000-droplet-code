@@ -18,7 +18,7 @@ except:
     raise NameError("File has not been found check if file is correct")
 
 # note it will do sigma_min, sigma_min+1, ..., sigma_max-1 
-[sigma_min, sigma_max, sigma_step] = [66, 80, 0.25] 
+[sigma_min, sigma_max, sigma_step] = [70, 80, 0.25] 
 [volume_min, volume_max, volume_step] = [32, 33, 1]
 [rneedle_min, rneedle_max, rneedle_step] = [1,2,1]
 

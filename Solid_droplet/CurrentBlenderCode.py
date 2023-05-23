@@ -8,15 +8,16 @@ import mathutils
 import math
 import bmesh
 from bmesh.ops import spin
+import numpy as np
 
 dir = os.path.dirname(bpy.data.filepath)
 if not dir in sys.path:
     sys.path.append(dir )
 from fun_genSingleDrop import *
 
-sigma = int(sys.argv[-1])
-#volume = sys.argv
-#rneedle = sys.argv
+sigma_range = np.arange(int(sys.argv[-9]), int(sys.argv[-8]), float(sys.argv[-7]))
+volume_range = np.arange(int(sys.argv[-6]), int(sys.argv[-5]), float(sys.argv[-4]))
+rneedle_range = np.arange(int(sys.argv[-3]), int(sys.argv[-2]), float(sys.argv[-1]))
 
 for ob in bpy.data.objects:
     if ob.name in ["Light"]:

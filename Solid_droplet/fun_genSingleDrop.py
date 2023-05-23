@@ -1,12 +1,11 @@
-import math as m
 import numpy as np 
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
-import warnings
 from dif1D import *
 from fit_circle_through_3_points import *
 
-warnings.filterwarnings('ignore')
+from warnings import filterwarnings
+filterwarnings('ignore') # Remove invalid value/divide by zero
 
 def __init__():
    return
@@ -15,21 +14,25 @@ def rms(y) :
         rms = np.sqrt(np.mean(y**2))
         return rms
 
-def genSingleDrop(sigma,volume0,rneedle,output=0,savepath='.'):
+def genSingleDrop(sigma:int=100,volume0:int=32,rneedle:int=1,output=0,savepath='.'):
     '''
-    sigma: surface tension [mN/m]
-    volume0: prescribed volume in mm^3; 
-    rneedle: radius of the needle [mm]; default 1
-    output: 0-->save images in savepath, 1-->output r_a and z_a
+    Function to generate round droplet with needle (points or image).\n
+    This function computes using dimensionless form.
+
+    Parameters
+      sigma:int = 100;  surface tension [mN/m]
+      volume0:int = 32; prescribed volume in [mm^3]
+      rneedle:int = 1; radius of the needle [mm]
+      output: 0-->save images in savepath, 1-->output r_a and z_a
+    Return
+      path: the path to the image (only if output=0)
+      or 
+      r_a, z_a: the coordinates of the droplet (only if output=1)
     '''
     # physical parameters
-    
-    #sigma = 100;           # surface tension [mN/m]
-    #rneedle = 1;           # radius of the needle [mm]
-    #volume0 = 32;          # prescribed volume in mm^3
     grav = 9.807e3;         # gravitational acceleration [mm/s^2]
     deltarho = 1e-3;        # density difference [10^6 kg/m^3]
-    pi=m.pi
+    pi=np.pi
 
     # numerical parameters
     N = 40;                 # resolution of the discretization for calculation
@@ -37,9 +40,6 @@ def genSingleDrop(sigma,volume0,rneedle,output=0,savepath='.'):
     #Ncheb = 10;            # number of Chebyshev to describe the shape
     alpha = 0.1;            # relaxation parameter in the Newton-Raphson scheme
 
-    
-    # NOTE: the calculation is done in dimensionless form, using the 
-    # dimensionless surface tension sigma' and volume V'
 
     # calculate the dimensionless quantities
     sigmaprime = sigma/(deltarho*grav*rneedle**2)
@@ -49,19 +49,19 @@ def genSingleDrop(sigma,volume0,rneedle,output=0,savepath='.'):
     if  deltarho*grav*volume0/(2*pi*sigma*rneedle) > 0.14:
 
         # predict the maximum length of the interface (empirical Nagel)
-        smax = m.sqrt(sigmaprime)*2.0/0.8701
+        smax = np.sqrt(sigmaprime)*2.0/0.8701
 
         # get the differentation/integration matrices and the grid
         D,_,w,s = dif1D('cheb',0,smax,N,5)
 
         # predict the shape of the interface (empirical Nagel)
-        z = -4/3*smax/m.pi*(np.cos(m.pi*3/4*s/smax))
+        z = -4/3*smax/pi*(np.cos(pi*3/4*s/smax))
         z = z - max(z)
-        r = 4/3*smax/m.pi*(np.sin(m.pi*3/4*s/smax))
-        psi = m.pi*3/4*s/smax
+        r = 4/3*smax/pi*(np.sin(pi*3/4*s/smax))
+        psi = pi*3/4*s/smax
 
         C = 1; # initial stretch parameter
-        p0 = m.sqrt(sigmaprime)*1.5; # predict the pressure (empirical Nagel)
+        p0 = np.sqrt(sigmaprime)*1.5; # predict the pressure (empirical Nagel)
 
     else:
 
@@ -75,18 +75,18 @@ def genSingleDrop(sigma,volume0,rneedle,output=0,savepath='.'):
         # get the opening angle of the circle
 
         if xcyc[1] < 0:
-          theta = m.acos(1/Rguess)
+          theta = np.acos(1/Rguess)
         else:
-          theta = -m.acos(1/Rguess)
+          theta = -np.acos(1/Rguess)
 
         # predict the maximum length of the interface
-        smax = Rguess*(2*theta+m.pi)
+        smax = Rguess*(2*theta+pi)
 
         # get the differentation/integration matrices and the grid
         D,_,w,s = dif1D('fd',0,smax,N,5)
 
         # start- and end-point of the current radial line
-        dtheta = np.linspace(-m.pi/2,theta,N)
+        dtheta = np.linspace(-pi/2,theta,N)
         dtheta = dtheta.T
         r = xcyc[0] + Rguess*np.cos(dtheta).reshape((40,1))
         z = xcyc[1] + Rguess*np.sin(dtheta).reshape((40,1))
@@ -150,8 +150,8 @@ def genSingleDrop(sigma,volume0,rneedle,output=0,savepath='.'):
         # determine pressure - use volume
       A91 = 2*w*r.T*np.sin(psi.T)
       A93 = w*r.T**2*np.cos(psi.T)
-      A98 = np.array(-volume0prime/m.pi).reshape(1,1)
-      b9 = -(np.dot(w,(r**2*np.sin(psi)))-C*volume0prime/m.pi)
+      A98 = np.array(-volume0prime/pi).reshape(1,1)
+      b9 = -(np.dot(w,(r**2*np.sin(psi)))-C*volume0prime/pi)
 
       # boundary condition r(0) = 0
       A11[0,:] = IDL; 

@@ -9,6 +9,7 @@ import mathutils
 from math import pi
 import bmesh
 from bmesh.ops import spin
+import numpy as np
 
 # Add function directories
 TEST_DIR = os.getcwd()
@@ -18,9 +19,9 @@ sys.path.insert(1, FUNC_DIR) if not FUNC_DIR in sys.path else print("Path exists
 
 from fun_genSingleDrop import *
 
-sigma_range = range(int(sys.argv[-6]), int(sys.argv[-5]))
-volume_range = range(int(sys.argv[-4]), int(sys.argv[-3]))
-rneedle_range = range(int(sys.argv[-2]), int(sys.argv[-1]))
+sigma_range = np.arange(int(sys.argv[-9]), int(sys.argv[-8]), float(sys.argv[-7]))
+volume_range = np.arange(int(sys.argv[-6]), int(sys.argv[-5]), float(sys.argv[-4]))
+rneedle_range = np.arange(int(sys.argv[-3]), int(sys.argv[-2]), float(sys.argv[-1]))
 
 for sigma in sigma_range:
     for volume in volume_range:
@@ -102,34 +103,34 @@ for sigma in sigma_range:
             # Set the background color to blue
             bpy.context.scene.world.node_tree.nodes['Background'].inputs[0].default_value = (0.0, 0.0, 0.0, 1.0)
             
-            ### Should be removed if not using two step ==>
+            # ### Should be removed if not using two step ==>
 
-            for ob in bpy.data.objects:
-                if ob.name in ["droplet_object"]:
-                    bpy.data.objects[ob.name].select_set(True)
-                    if ob.data.materials:
-                        idx = ob.active_material_index
-                        ob.material_slots[idx].material = bpy.data.materials.get("DropletEmission")
-                    else:
-                        ob.data.materials.append(bpy.data.materials.get("DropletEmission"))
-                if ob.name in ["needle_object"]:
-                    try:
-                        bpy.data.objects[ob.name].select_set(True)
-                        if ob.data.materials:
-                            idx = ob.active_material_index
-                            ob.material_slots[idx].material = bpy.data.materials.get("BackgroundEmission")
-                        else:
-                            ob.data.materials.append(bpy.data.materials.get("BackgroundEmission"))
-                    except:
-                        pass
+            # for ob in bpy.data.objects:
+            #     if ob.name in ["droplet_object"]:
+            #         bpy.data.objects[ob.name].select_set(True)
+            #         if ob.data.materials:
+            #             idx = ob.active_material_index
+            #             ob.material_slots[idx].material = bpy.data.materials.get("DropletEmission")
+            #         else:
+            #             ob.data.materials.append(bpy.data.materials.get("DropletEmission"))
+            #     if ob.name in ["needle_object"]:
+            #         try:
+            #             bpy.data.objects[ob.name].select_set(True)
+            #             if ob.data.materials:
+            #                 idx = ob.active_material_index
+            #                 ob.material_slots[idx].material = bpy.data.materials.get("BackgroundEmission")
+            #             else:
+            #                 ob.data.materials.append(bpy.data.materials.get("BackgroundEmission"))
+            #         except:
+            #             pass
 
-            # Save file
-            bpy.context.scene.frame_end = 0
-            bpy.context.scene.render.filepath = f"//Data//{sigma}_{volume}_{rneedle}_edgedetection"
-            bpy.ops.render.render(write_still = True)
+            # # Save file
+            # bpy.context.scene.frame_end = 0
+            # bpy.context.scene.render.filepath = f"//Data//{sigma}_{volume}_{rneedle}_edgedetection"
+            # bpy.ops.render.render(write_still = True)
 
-            bpy.data.objects["droplet_object"].select_set(True)
-            bpy.data.objects["droplet_object"].data.materials.clear()
+            # bpy.data.objects["droplet_object"].select_set(True)
+            # bpy.data.objects["droplet_object"].data.materials.clear()
 
             ### <== Should be removed if we are not using to step
 

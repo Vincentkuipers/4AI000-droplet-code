@@ -9,6 +9,7 @@ from os.path import join
 from sys import stdout
 from os import getcwd
 from tqdm import tqdm
+import numpy as np
 
 
 
@@ -93,6 +94,8 @@ class Trainer:
         amount = 0
         total_loss = 0
 
+        out = []
+        tru = []
 
         # Create a progress bar using TQDM
         stdout.flush()
@@ -119,23 +122,25 @@ class Trainer:
 
                 amount += 1
                 total_loss += step_metrics["loss"]
+
+                for i in range(len(output)):
+                    out.append(output[i].cpu().numpy())
+                    tru.append(truths[i].cpu().numpy())
+
         stdout.flush()
 
         # Print mean of metrics
         total_loss /= amount
         print(f'Validation loss is {total_loss/amount}')
+        
+        out = self.list_of_arr_to_arr(out)
+        tru = self.list_of_arr_to_arr(tru)
 
         # Return mean loss and accuracy
         return {
             "loss": [total_loss],
-        }
+        }, out, tru
     
-    # def fit(self, epochs:int):
-    #     for epoch in range(1, epochs+1):
-    #         metrics_train = self.train_epochs(epoch)
-    #         metrics_val = self.val_epoch(self.val, self.val_labels)
-    #         print(f"Epoch: {epoch} | Train Loss: {metrics_train['loss'][-1]} | Val Loss: {metrics_val['val_loss'][-1]}")
-    #     return metrics_train, metrics_val
     
     def save_model(self, model_name:str, DIR:str=getcwd()):
         """Save the model"""
@@ -159,9 +164,23 @@ class Trainer:
             metrics_train = self.train_epoch(dl_train)
             df_train = df_train.append(DataFrame({'epoch': [epoch for _ in range(len(metrics_train["loss"]))], **metrics_train}), ignore_index=True)
 
-            metrics_val = self.val_epoch(dl_val)
+            metrics_val, _, _ = self.val_epoch(dl_val)
             df_val = df_val.append(DataFrame({'epoch': [epoch], **metrics_val}), ignore_index=True)
 
         df_train.to_csv('savefolderpytorch\\train.csv')
         df_val.to_csv('savefolderpytorch\\val.csv')
         # Return a dataframe that logs the training process. This can be exported to a CSV or plotted directly.
+    
+    def load_model(self, model_name:str, DIR:str=getcwd()):
+        """Load the model"""
+        store_path = join(DIR, model_name)
+        
+        self.model.load_state_dict(store_path)
+        
+    def list_of_arr_to_arr(self, output:list):
+        for i in range(1, len(output)):
+            if i == 1:
+                output_arr = np.append(output[0],output[i])
+            else:
+                output_arr = np.append(output_arr, output[i])
+        return output_arr.reshape(int(output_arr.shape[0]/3),3)

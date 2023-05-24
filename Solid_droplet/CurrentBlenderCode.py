@@ -19,7 +19,9 @@ sys.path.insert(0, FUNC_DIR)
 
 from fun_genSingleDrop import *
 
-
+num_steps = int(sys.argv[-13])
+vert_steps = int(sys.argv[-14])
+radius_range = np.arange(int(sys.argv[-12]), int(sys.argv[-11]), float(sys.argv[-10]))
 sigma_range = np.arange(int(sys.argv[-9]), int(sys.argv[-8]), float(sys.argv[-7]))
 volume_range = np.arange(int(sys.argv[-6]), int(sys.argv[-5]), float(sys.argv[-4]))
 rneedle_range = np.arange(int(sys.argv[-3]), int(sys.argv[-2]), float(sys.argv[-1]))
@@ -163,8 +165,8 @@ for sigma in sigma_range:
             environment_texture_node = world_node_tree.nodes.new(type='ShaderNodeTexEnvironment')
 
             # Load the background image
-            background_image = bpy.data.images.load('C:/4AI000/Solid_droplet/scythian_tombs_2_4k.exr')
-
+            background_image = bpy.data.images.load('C:/Schoolmeuk/Master_AIES/1-Q4_ML_for_physic/4AI000/Solid_droplet/scythian_tombs_2_4k.exr')
+                                                
             # Set the image as the texture for the Environment Texture node
             environment_texture_node.image = background_image
 
@@ -220,12 +222,51 @@ for sigma in sigma_range:
             # print("Camera location:", camera.location) # Camera location: begin (7.3589, -6.9258, 4.9583)>
             # print("Camera rotation (Euler angles):", camera.rotation_euler) #Camera rotation (Euler angles):begin (x=1.1093, y=0.0000, z=0.8149), order='XYZ'>
 
-            # Set the camera location and rotation
-            camera.location = (7.3589*1.5,-6.9258*1.5, 4.9583)         #x, y, z are the desired location values
-            camera.rotation_euler = (1.1093*1.25, 0, 0.8149*1.2)           # rx, ry, rz are the rotation values in radians
+            # Camera
+            camera.rotation_euler = (0.25*np.pi, 0, 0.8149*1.2)
+            camera.location.z = obj.location.z + 2
 
-            bpy.context.scene.frame_end = 0
-            #bpy.context.scene.render.file_extension = "PNG"
-            bpy.context.scene.render.filepath = f"//Data//{sigma}_{volume}_{rneedle}"
-            bpy.ops.render.render(write_still = True)
+            target = bpy.data.objects['droplet_object']
+            cam = bpy.data.objects['Camera']
+            t_loc_x = target.location.x
+            t_loc_y = target.location.y
+            cam_loc_x = cam.location.x
+            cam_loc_y = cam.location.y
+
+
+            R = (target.location.xy-cam.location.xy).length # Radius
+            # init_angle = 0
+            init_angle  = (1-2*bool((cam_loc_y-t_loc_y)<0))*np.arccos((cam_loc_x-t_loc_x)/R)-2*np.pi*bool((cam_loc_y-t_loc_y)<0) # 8.13 degrees
+            target_angle = (np.pi*2 - init_angle) # Go 90-8 deg more
+            
+
+            vert_init_angle = 0.25*np.pi
+            vert_angle_step = (np.pi/(14))
+            
+
+            for r in radius_range:
+                for x in range(num_steps):
+                    for z in range(vert_steps):
+                        alpha = init_angle + (x)*target_angle/num_steps
+                        cam.rotation_euler[2] = np.pi/2 + alpha 
+                        beta = (z)*vert_angle_step/vert_steps
+                        cam.rotation_euler[0] = np.pi/2.3 + beta
+                        cam.location.x = t_loc_x+np.cos(alpha)*r
+                        cam.location.y = t_loc_y+np.sin(alpha)*r
+
+                        bpy.context.scene.frame_end = 0
+                        #bpy.context.scene.render.file_extension = "PNG"
+                        bpy.context.scene.render.filepath = f"//Data//{sigma}_{volume}_{rneedle}_{r}_{x}_{z}"
+                        # bpy.context.scene.render.filepath = f"//Data//Image{beta}"
+                        bpy.ops.render.render(write_still = True)
+
+            # # Set the camera location and rotation
+            # camera.location = (7.3589*1.5,-6.9258*1.5, 4.9583)         #x, y, z are the desired location values
+            # camera.rotation_euler = (1.1093*1.25, 0, 0.8149*1.2)           # rx, ry, rz are the rotation values in radians
+
+            
+
+
+
+
 

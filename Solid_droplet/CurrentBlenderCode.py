@@ -256,7 +256,7 @@ for sigma in sigma_range:
 
                         bpy.context.scene.frame_end = 0
                         #bpy.context.scene.render.file_extension = "PNG"
-                        bpy.context.scene.render.filepath = f"//Data//{sigma}_{volume}_{rneedle}_{r}_{x}_{z}"
+                        bpy.context.scene.render.filepath = f"//Data//{sigma}_{volume}_{rneedle}-{r}-{x}-{z}"
                         # bpy.context.scene.render.filepath = f"//Data//Image{beta}"
                         bpy.ops.render.render(write_still = True)
 

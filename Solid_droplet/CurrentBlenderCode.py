@@ -241,7 +241,7 @@ for sigma in sigma_range:
             
 
             vert_init_angle = 0.25*np.pi
-            vert_angle_step = (np.pi/(14))
+            vert_angle_step = (np.pi/(28))
             
 
             for r in radius_range:
@@ -250,13 +250,13 @@ for sigma in sigma_range:
                         alpha = init_angle + (x)*target_angle/num_steps
                         cam.rotation_euler[2] = np.pi/2 + alpha 
                         beta = (z)*vert_angle_step/vert_steps
-                        cam.rotation_euler[0] = np.pi/2.3 + beta
+                        cam.rotation_euler[0] = np.pi/2.1  + beta
                         cam.location.x = t_loc_x+np.cos(alpha)*r
                         cam.location.y = t_loc_y+np.sin(alpha)*r
 
                         bpy.context.scene.frame_end = 0
                         #bpy.context.scene.render.file_extension = "PNG"
-                        bpy.context.scene.render.filepath = f"//Data//{sigma}_{volume}_{rneedle}-{r}-{x}-{z}"
+                        bpy.context.scene.render.filepath = f"//Data//{sigma}_{volume}-{rneedle}-{r}-{x}-{z}"
                         # bpy.context.scene.render.filepath = f"//Data//Image{beta}"
                         bpy.ops.render.render(write_still = True)
 

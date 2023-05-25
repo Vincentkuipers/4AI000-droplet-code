@@ -23,7 +23,7 @@ class CustomImageDataset(Dataset):
         image_path = path.join(self.root_dir, filename)
 
         # Get label:
-        label = tensor(array(filename.split(".png")[0].split("_"), dtype=float), device=self.device, dtype=float32) # return list of int/float instead of str
+        label = tensor(array(filename.split(".png")[0].split("-")[0].split("_"), dtype=float), device=self.device, dtype=float32) # return list of int/float instead of str
 
         # Get image
         image = Image.open(image_path).convert('RGB').resize((256,256))

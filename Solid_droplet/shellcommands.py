@@ -18,12 +18,12 @@ except:
     raise NameError("File has not been found check if file is correct")
 
 # note it will do sigma_min, sigma_min+1, ..., sigma_max-1 
-[sigma_min, sigma_max, sigma_step] = [67, 69, 1] 
+[sigma_min, sigma_max, sigma_step] = [67, 75, 0.5] 
 [volume_min, volume_max, volume_step] = [32, 33, 1]
 [rneedle_min, rneedle_max, rneedle_step] = [1,2,1]
-[range_min, range_max, range_step] = [20,22,1]
-[num_steps] = [2] # number of steps to perform 360 rotation
-[vert_steps] = [3] # number of steps with a set angle increase vertically, angle is defined in currentblendercode
+[range_min, range_max, range_step] = [20,21,1]
+[num_steps] = [30] # number of steps to perform 360 rotation
+[vert_steps] = [2] # number of steps with a set angle increase vertically, angle is defined in currentblendercode
 
 image_count = int(((sigma_max - sigma_min) /sigma_step)*((volume_max - volume_min) /volume_step)*((rneedle_max - rneedle_min) /rneedle_step)*((range_max - range_min) /range_step)*num_steps*vert_steps )
 print('Number of images:', image_count)

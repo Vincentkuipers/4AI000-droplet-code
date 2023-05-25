@@ -183,4 +183,4 @@ class Trainer:
                 output_arr = np.append(output[0],output[i])
             else:
                 output_arr = np.append(output_arr, output[i])
-        return output_arr.reshape(int(output_arr.shape[0]/3),3)
+        return output_arr.reshape(int(output_arr.shape[0]/2),2)

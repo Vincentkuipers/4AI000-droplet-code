@@ -2,7 +2,7 @@ from torch import nn
 
 class RESNET50(nn.Module):
     """Initilize the RESNET50 model"""
-    def __init__(self, out_features, bias:bool=True):
+    def __init__(self, out_features:int=2, bias:bool=True):
         """RESNET50 setup + forward pass"""
         super(RESNET50, self).__init__()
         self.conv2d_00 = nn.Sequential(

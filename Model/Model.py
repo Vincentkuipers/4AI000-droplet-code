@@ -1,7 +1,7 @@
 from torch import nn
 
 class CNNModel(nn.Module):
-    def __init__(self):
+    def __init__(self, out_features:int=2):
         super(CNNModel, self).__init__()
         
         # Define the convolutional layers
@@ -23,7 +23,7 @@ class CNNModel(nn.Module):
         # Define the fully connected layers
         self.fc1 = nn.Linear(16384, 64)
         self.relu4 = nn.ReLU()
-        self.fc2 = nn.Linear(64, 2)
+        self.fc2 = nn.Linear(64, out_features=out_features)
         
     def forward(self, x):
         # Apply the convolutional layers

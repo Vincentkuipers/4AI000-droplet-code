@@ -8,8 +8,8 @@ from warnings import filterwarnings
 filterwarnings('ignore') # Remove invalid value/divide by zero
 
 def rms(y) :
-  rms = np.sqrt(np.mean(y**2))
-  return rms
+    rms = np.sqrt(np.mean(y**2))
+    return rms
 
 def genSingleDrop(sigma:int=100,volume0:int=32,rneedle:int=1,output=0,savepath='.'):
     '''
@@ -17,14 +17,14 @@ def genSingleDrop(sigma:int=100,volume0:int=32,rneedle:int=1,output=0,savepath='
     This function computes using dimensionless form.
 
     Parameters
-      sigma:int = 100;  surface tension [mN/m]
-      volume0:int = 32; prescribed volume in [mm^3]
-      rneedle:int = 1; radius of the needle [mm]
-      output: 0-->save images in savepath, 1-->output r_a and z_a
+        sigma:int = 100;  surface tension [mN/m]
+        volume0:int = 32; prescribed volume in [mm^3]
+        rneedle:int = 1; radius of the needle [mm]
+        output: 0-->save images in savepath, 1-->output r_a and z_a
     Return
-      path: the path to the image (only if output=0)
-      or 
-      r_a, z_a: the coordinates of the droplet (only if output=1)
+        path: the path to the image (only if output=0)
+    or 
+        r_a, z_a: the coordinates of the droplet (only if output=1)
     '''
     # physical parameters
     grav = 9.807e3;         # gravitational acceleration [mm/s^2]
@@ -107,122 +107,100 @@ def genSingleDrop(sigma:int=100,volume0:int=32,rneedle:int=1,output=0,savepath='
     iter = 0; crash = 0; 
 
     for i in range(1201):
-      if rms(u) < 1e-10:
-       print("Early stopped because convergence")
-       return r, z
+        if rms(u) < 1e-10:
+            print("Early stopped because convergence")
+            break
 
-      
-      A11 = C*D; 
-      A13 = np.diag(np.squeeze(np.sin(psi)))
-      A18 = np.dot(D,r); 
-      b1 = -(C*np.dot(D,r)-np.cos(psi))
-      # determine z from psi 
-      A22 = C*D; 
-      A23 = np.diag(np.squeeze(-np.cos(psi))); 
-      A28 = np.dot(D,z)
-      b2 = -(C*np.dot(D,z)-np.sin(psi))
+        A11 = C*D; 
+        A13 = np.diag(np.squeeze(np.sin(psi)))
+        A18 = np.dot(D,r); 
+        b1 = -(C*np.dot(D,r)-np.cos(psi))
+        # determine z from psi 
+        A22 = C*D; 
+        A23 = np.diag(np.squeeze(-np.cos(psi))); 
+        A28 = np.dot(D,z)
+        b2 = -(C*np.dot(D,z)-np.sin(psi))
 
-      # determine psi from Laplace law
+        # determine psi from Laplace law
 
-      A31 = -sigmaprime*np.diag(np.squeeze(np.sin(psi)/r**2))
-      A32 = np.diag(np.squeeze(np.ones(N)))
-      A33 = C*sigmaprime*D + sigmaprime*np.diag(np.squeeze(np.cos(psi)/r))
-      A38 = sigmaprime*(np.dot(D,psi))
-      A39 = -np.ones(N)
-      b3 = p0-z-sigmaprime*(C*np.dot(D,psi)+np.sin(psi)/r)
+        A31 = -sigmaprime*np.diag(np.squeeze(np.sin(psi)/r**2))
+        A32 = np.diag(np.squeeze(np.ones(N)))
+        A33 = C*sigmaprime*D + sigmaprime*np.diag(np.squeeze(np.cos(psi)/r))
+        A38 = sigmaprime*(np.dot(D,psi))
+        A39 = -np.ones(N)
+        b3 = p0-z-sigmaprime*(C*np.dot(D,psi)+np.sin(psi)/r)
 
-      # impose the needle radius as a BC (imposes the domain length)
-      # NOTE: the lengths are scaled with the radius, thus its value is one
+        # impose the needle radius as a BC (imposes the domain length)
+        # NOTE: the lengths are scaled with the radius, thus its value is one
 
-      A81 = np.flip(IDL).reshape(1,N); 
-      b8 = (1-r[-1])
+        A81 = np.flip(IDL).reshape(1,N); 
+        b8 = (1-r[-1])
 
         # determine pressure - use volume
-      A91 = 2*w*r.T*np.sin(psi.T)
-      A93 = w*r.T**2*np.cos(psi.T)
-      A98 = np.array(-volume0prime/pi).reshape(1,1)
-      b9 = -(np.dot(w,(r**2*np.sin(psi)))-C*volume0prime/pi)
+        A91 = 2*w*r.T*np.sin(psi.T)
+        A93 = w*r.T**2*np.cos(psi.T)
+        A98 = np.array(-volume0prime/pi).reshape(1,1)
+        b9 = -(np.dot(w,(r**2*np.sin(psi)))-C*volume0prime/pi)
 
-      # boundary condition r(0) = 0
-      A11[0,:] = IDL; 
-      A13[0,:] = ZL; 
-      A18[0] = 0
-      b1[0] = -r[0]
+        # boundary condition r(0) = 0
+        A11[0,:] = IDL; 
+        A13[0,:] = ZL; 
+        A18[0] = 0
+        b1[0] = -r[0]
 
-      # boundary condition z(s0) = 0
-      A22[0,:] = np.flip(IDL); 
-      A23[0,:] = ZL; 
-      A28[0] = 0
-      b2[0] = -z[-1]
+        # boundary condition z(s0) = 0
+        A22[0,:] = np.flip(IDL); 
+        A23[0,:] = ZL; 
+        A28[0] = 0
+        b2[0] = -z[-1]
 
-      # boundary condition phi(0) = 0
-      A31[0,:] = ZL; 
-      A32[0,:] = ZL; 
-      A33[0,:] = IDL; 
-      A38[0,:] = 0; 
-      A39[0] = 0
-      A39=A39.reshape(N,1)
-      b3[0] = -psi[0]
+        # boundary condition phi(0) = 0
+        A31[0,:] = ZL; 
+        A32[0,:] = ZL; 
+        A33[0,:] = IDL; 
+        A38[0,:] = 0; 
+        A39[0] = 0
+        A39=A39.reshape(N,1)
+        b3[0] = -psi[0]
 
-      # assemble matrices
-      Z1 = np.zeros(N).reshape(N,1)
+        # assemble matrices
+        Z1 = np.zeros(N).reshape(N,1)
 
-      A = np.vstack((np.hstack((A11, Z, A13, A18, Z1)),
+        A = np.vstack((np.hstack((A11, Z, A13, A18, Z1)),
                     np.hstack((Z, A22, A23, A28, Z1)),
                     np.hstack((A31, A32, A33, A38, A39)),
                     np.hstack((A81, np.zeros((1,2*N)), np.array(-1).reshape(1,1), np.array(0).reshape(1,1))),
                     np.hstack((A91, Z1.T,A93,A98,np.array(0).reshape(1,1)))))
 
-      b = np.vstack((b1,b2,b3,b8,b9)); 
+        b = np.vstack((b1,b2,b3,b8,b9)); 
 
-      # solve the system of equations
-      u = np.linalg.inv(A).dot(b)
+        # solve the system of equations
+        u = np.linalg.inv(A).dot(b)
 
-      # update variables
-      r   = r   + alpha*u[0:N]
-      z   = z   + alpha*u[N:2*N]; 
-      psi = psi + alpha*u[2*N:3*N]; 
-      C   = C   + alpha*u[3*N]; 
-      p0  = p0  + alpha*u[3*N+1]; 
+        # update variables
+        r   = r   + alpha*u[0:N]
+        z   = z   + alpha*u[N:2*N]; 
+        psi = psi + alpha*u[2*N:3*N]; 
+        C   = C   + alpha*u[3*N]; 
+        p0  = p0  + alpha*u[3*N+1]; 
 
-      if rms(b) > 1e3:
-         break; 
+        if rms(b) > 1e3:
+            print("Early stopped because of divergence")
+            break; 
 
     r_a=np.squeeze(r,axis=1)
     z_a=np.squeeze(z,axis=1)
 
     if output==0:
-      r_a[-1]=0
-      z_a[-1]=0
-      path=savepath+"/s%.2f_v%.2f_rn%.2f.jpg" %(sigma, volume0, rneedle)
-      plt.figure(figsize=(10,10))
-      plt.fill(-r_a*rneedle,z_a*rneedle,r_a*rneedle,z_a*rneedle,color='black')
-      plt.axis('equal')
-      plt.axis('off')
-      plt.savefig(path,bbox_inches='tight',pad_inches=0.0)
-      plt.close()
-      return path, r_a, z_a
+        r_a[-1]=0
+        z_a[-1]=0
+        path=savepath+"/s%.2f_v%.2f_rn%.2f.jpg" %(sigma, volume0, rneedle)
+        plt.figure(figsize=(10,10))
+        plt.fill(-r_a*rneedle,z_a*rneedle,r_a*rneedle,z_a*rneedle,color='black')
+        plt.axis('equal')
+        plt.axis('off')
+        plt.savefig(path,bbox_inches='tight',pad_inches=0.0)
+        plt.close()
+        return path
     else:
-      return r_a,z_a
-
-
-def plt_image_needle(r_a,z_a,path,l_needle=4,sigma=0,volume0=0,rneedle=1):
-    '''
-    Use this function to generate the image with needle;
-    r_a and z_a from the output of genSingleDrop (output=1); 
-    l_needle is the length of the needle;
-    sigma, volume0 and rneedle is only used to name the image.
-    '''
-    path=path+"/s%.2f_v%.2f_rn%.2f_ln%.2f_needle.jpg" %(sigma, volume0, rneedle,l_needle)
-    plt.figure(figsize=(10,10))
-    plt.plot(r_a,z_a,color='black')
-    plt.plot(-r_a,z_a,color='black')
-    
-    plt.fill_between(r_a,l_needle,0,color='black')
-    plt.fill_between(-r_a,l_needle,0,color='black')
-    plt.fill(-r_a,z_a,r_a,z_a,color='black')
-
-    plt.axis('equal')
-    plt.axis('off')
-    plt.savefig(path)
-    return
+        return r_a, z_a

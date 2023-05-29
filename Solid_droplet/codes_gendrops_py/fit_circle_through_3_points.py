@@ -51,23 +51,24 @@ def fit_circle_through_3_points(ABC):# need rewrite
 
     # ============= Compute xc, the circle center x-coordinate
     xc= (mr*mt*(y3-y1)+mr*(x2+x3)-mt*(x1+x2))/(2*(mr-mt))
+    yc=-1./mr*(xc-(x1+x2)/2)+(y1+y2)/2
+
     if idf1==1: #Failure mode (1) ==> use limit case of mr==Inf
         xc=(mt*(y3-y1)+(x2+x3))/2 
+        R=sqrt((xc-x1)**2+(yc-y1)**2)
+
     if idf2==1: #Failure mode (2) ==> use limit case of mt==Inf
-        xc = ((x1+x2)-mr*(y3-y1))/2; 
+        xc = ((x1+x2)-mr*(y3-y1))/2;
+        R=sqrt((xc-x1)**2+(yc-y1)**2) 
+    
     if idf34==1: #Failure mode (3) or (4) ==> cannot determine center point, return None
         xc = None
-    # ============= Compute yc, the circle center y-coordinate
-    yc=-1./mr*(xc-(x1+x2)/2)+(y1+y2)/2
-    idmr0 = mr==0
-    if idmr0==1: 
-        yc = -1./mt*(xc-(x2+x3)/2)+(y2+y3)/2 
-    if idf34==1: #Failure mode (3) or (4) ==> cannot determine center point, return None
         yc = None
-    # ============= Compute the circle radius
-    R=sqrt((xc-x1)**2+(yc-y1)**2)
-    if idf34==1:
         R=float("inf")
+
+    if mr==0: 
+        yc = -1./mt*(xc-(x2+x3)/2)+(y2+y3)/2 
+            
     xcyc=array([xc,yc]).reshape(2,1)
 
     return R,xcyc

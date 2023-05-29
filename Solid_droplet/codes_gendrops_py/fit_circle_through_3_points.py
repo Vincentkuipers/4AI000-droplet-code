@@ -12,10 +12,13 @@ def fit_circle_through_3_points(ABC):# need rewrite
     R       is a [1 x n] array of circle radii corresponding to each set of three points.
     xcyc    is an [2 x n] array of of the centers of the circles, where each column is [[xc_i][yc_i]] 
     where i corresponds to the {A,B,C} set of points in the block [3 x 2i-1:2i] of ABC  
+    ----------------------------------------------------------------------------------------------------------
     Author: Danylo Malyuta.
     Transfer: Yicheng Zang
+    Update: Diederik Huige
     Version: v1.0 (June 2016)
     Transfer Version: v1.0 (Nov. 2022)
+    Update Version: v1.1 (May 2023)
     ----------------------------------------------------------------------------------------------------------
     Each set of points {A,B,C} lies on a circle. Question: what is the circles radius and center?
     A: point with coordinates (x1,y1)
@@ -40,7 +43,7 @@ def fit_circle_through_3_points(ABC):# need rewrite
     mt=(y3-y2)/(x3-x2)
 
     #A couple of failure modes exist:
-    #(1) First chord is vertical  ==>mr==Inf
+    #(1) First chord is vertical       ==> mr==Inf
     #(2) Second chord is vertical      ==> mt==Inf
     #(3) Points are collinear          ==> mt==mr (NB: NaN==NaN here)
     #(4) Two or more points coincident ==> mr==NaN || mt==NaN
@@ -49,25 +52,28 @@ def fit_circle_through_3_points(ABC):# need rewrite
     idf2 = isinf(mt)
     idf34 = mr==mt or isnan(mr) or isnan(mt)
 
-    # ============= Compute xc, the circle center x-coordinate
+
+    #Now calculate the center point of the circle
     xc= (mr*mt*(y3-y1)+mr*(x2+x3)-mt*(x1+x2))/(2*(mr-mt))
     yc=-1./mr*(xc-(x1+x2)/2)+(y1+y2)/2
+    
+    # Failure mode for yc due too mr == 0.
+    if mr==0: 
+        yc=-1./mt*(xc-(x2+x3)/2)+(y2+y3)/2 
 
-    if idf1==1: #Failure mode (1) ==> use limit case of mr==Inf
+    # Failure modes computation of xc and yc (see above)
+    if idf1==1: #Failure mode (1) 
         xc=(mt*(y3-y1)+(x2+x3))/2 
         R=sqrt((xc-x1)**2+(yc-y1)**2)
 
-    if idf2==1: #Failure mode (2) ==> use limit case of mt==Inf
-        xc = ((x1+x2)-mr*(y3-y1))/2;
+    if idf2==1: #Failure mode (2) 
+        xc=((x1+x2)-mr*(y3-y1))/2
         R=sqrt((xc-x1)**2+(yc-y1)**2) 
     
-    if idf34==1: #Failure mode (3) or (4) ==> cannot determine center point, return None
+    if idf34==1: #Failure mode (3) or (4) 
         xc = None
         yc = None
         R=float("inf")
-
-    if mr==0: 
-        yc = -1./mt*(xc-(x2+x3)/2)+(y2+y3)/2 
             
     xcyc=array([xc,yc]).reshape(2,1)
 

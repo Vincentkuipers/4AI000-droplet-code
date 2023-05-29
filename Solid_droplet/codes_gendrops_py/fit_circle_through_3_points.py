@@ -1,8 +1,5 @@
-import numpy as np
-import math as m
-
-def __init__():
-    return
+from numpy import array, isinf, isnan
+from math import sqrt
 
 def fit_circle_through_3_points(ABC):# need rewrite
     ''' Mathematical background is provided in http://www.regentsprep.org/regents/math/geometry/gcg6/RCir.html
@@ -48,9 +45,9 @@ def fit_circle_through_3_points(ABC):# need rewrite
     #(3) Points are collinear          ==> mt==mr (NB: NaN==NaN here)
     #(4) Two or more points coincident ==> mr==NaN || mt==NaN
     #Resolve these failure modes case-by-case.
-    idf1 = np.isinf(mr)
-    idf2 = np.isinf(mt)
-    idf34 = mr==mt or np.isnan(mr) or np.isnan(mt)
+    idf1 = isinf(mr)
+    idf2 = isinf(mt)
+    idf34 = mr==mt or isnan(mr) or isnan(mt)
 
     # ============= Compute xc, the circle center x-coordinate
     xc= (mr*mt*(y3-y1)+mr*(x2+x3)-mt*(x1+x2))/(2*(mr-mt))
@@ -68,9 +65,9 @@ def fit_circle_through_3_points(ABC):# need rewrite
     if idf34==1: #Failure mode (3) or (4) ==> cannot determine center point, return None
         yc = None
     # ============= Compute the circle radius
-    R=m.sqrt((xc-x1)**2+(yc-y1)**2)
+    R=sqrt((xc-x1)**2+(yc-y1)**2)
     if idf34==1:
         R=float("inf")
-    xcyc=np.array([xc,yc]).reshape(2,1)
+    xcyc=array([xc,yc]).reshape(2,1)
 
     return R,xcyc

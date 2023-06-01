@@ -35,7 +35,7 @@ for sigma in sigma_range:
                     bpy.data.objects[ob.name].select_set(True)
                     bpy.ops.object.delete()
         
-            r_a, z_a = genSingleDrop(sigma, 32, 1,1 )
+            r_a, z_a = genSingleDrop(sigma, volume, rneedle, 1 )
             edge_points = [0] * (len(r_a)+1)
 
             for i in range(len(r_a)):
@@ -56,7 +56,7 @@ for sigma in sigma_range:
 
             # Modify the cylinder's properties (optional)
             cylinder.name = "RoundCylinder"
-            cylinder.location = (0, 0, (5-z_a[0]*0.5))  # uses height of the droplet and 1/2 length of the needle
+            cylinder.location = (0, 0, (9.25-(z_a[-1]-z_a[0])/2))  # uses height of the droplet and 1/2 length of the needle
             cylinder.rotation_euler = (0, 0, 0)  # Rotate by 90 degrees around Z-axis
 
             # Set up material for a metal look
@@ -224,7 +224,7 @@ for sigma in sigma_range:
 
             # Camera
             camera.rotation_euler = (0.25*np.pi, 0, 0.8149*1.2)
-            camera.location.z = obj.location.z + 2
+            camera.location.z = obj.location.z + 3
 
             target = bpy.data.objects['droplet_object']
             cam = bpy.data.objects['Camera']
@@ -250,7 +250,7 @@ for sigma in sigma_range:
                         alpha = init_angle + (x)*target_angle/num_steps
                         cam.rotation_euler[2] = np.pi/2 + alpha 
                         beta = (z)*vert_angle_step/vert_steps
-                        cam.rotation_euler[0] = np.pi/2.1  + beta
+                        cam.rotation_euler[0] = np.pi/2  + beta
                         cam.location.x = t_loc_x+np.cos(alpha)*r
                         cam.location.y = t_loc_y+np.sin(alpha)*r
 

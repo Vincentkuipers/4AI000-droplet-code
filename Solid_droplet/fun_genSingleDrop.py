@@ -75,9 +75,9 @@ def genSingleDrop(sigma:int=100,volume0:int=32,rneedle:int=1,output=0,savepath='
         # get the opening angle of the circle
 
         if xcyc[1] < 0:
-          theta = np.acos(1/Rguess)
+          theta = np.arccos(1/Rguess)
         else:
-          theta = -np.acos(1/Rguess)
+          theta = -np.arccos(1/Rguess)
 
         # predict the maximum length of the interface
         smax = Rguess*(2*theta+pi)

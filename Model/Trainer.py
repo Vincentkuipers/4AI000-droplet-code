@@ -1,6 +1,6 @@
 from torch.cuda import is_available, get_device_name
+from torch import device, save, no_grad, load
 from torch.nn.utils import clip_grad_value_
-from torch import device, save, no_grad
 from torch.utils.data import DataLoader
 from torch.nn import Module, MSELoss
 from torch.optim import Adam
@@ -118,7 +118,7 @@ class Trainer:
 
                 # Update the progress bar
                 pbar.set_postfix(**step_metrics)
-                pbar.update(list(inputs.shape)[0])
+                pbar.update(dl.__len__())
 
                 amount += 1
                 total_loss += step_metrics["loss"]
@@ -175,7 +175,7 @@ class Trainer:
         """Load the model"""
         store_path = join(DIR, model_name)
         
-        self.model.load_state_dict(store_path)
+        self.model.load_state_dict(load(store_path))
         
     def list_of_arr_to_arr(self, output:list):
         for i in range(1, len(output)):

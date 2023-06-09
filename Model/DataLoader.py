@@ -28,7 +28,7 @@ class CustomImageDataset(Dataset):
         # Get image
         image = Image.open(image_path).convert('RGB').resize((512,512))
         
-        image = tensor(asarray(image), dtype=float32, device=self.device).permute(2,0,1)/255
+        image = tensor(asarray(image), dtype=float32, device=self.device).permute(2,0,1)/255 # normalize the image
 
         return image, label
     

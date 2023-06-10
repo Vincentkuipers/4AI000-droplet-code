@@ -46,34 +46,37 @@ class Trainer:
             "loss": [],
         }
 
-        # Iterate over the training dataset
-        for inputs, truths in dl:
-            # Zero the gradients from the previous step
-            self.optimizer.zero_grad()
+        with tqdm(total=dl.__len__(), leave=True) as pbar:
+            # Iterate over the training dataset
+            for inputs, truths in dl:
+                # Zero the gradients from the previous step
+                self.optimizer.zero_grad()
 
-            # Move the inputs and truths to the target device
-            inputs = inputs.to(device=self.device)
-            inputs.required_grad = True  # Fix for older PyTorch versions
-            truths = truths.reshape(len(truths),1).to(device=self.device)
+                # Move the inputs and truths to the target device
+                inputs = inputs.to(device=self.device)
+                inputs.required_grad = True  # Fix for older PyTorch versions
+                truths = truths.reshape(len(truths),1).to(device=self.device)
 
-            # Run model on the inputs
-            output = self.model(inputs)
+                # Run model on the inputs
+                output = self.model(inputs)
 
-            # Perform backpropagation
-            loss = self.criterion(output, truths)
-            loss.backward()
-            clip_grad_value_(self.model.parameters(), 0.1)
-            self.optimizer.step()
+                # Perform backpropagation
+                loss = self.criterion(output, truths)
+                loss.backward()
+                clip_grad_value_(self.model.parameters(), 0.1)
+                self.optimizer.step()
 
-            # Store the metrics of this step
-            step_metrics = {
-                'loss': loss.item(),
-            }
-            print(f'Training loss is {step_metrics["loss"]}', end='\r')
+                # Store the metrics of this step
+                step_metrics = {
+                    'loss': loss.item(),
+                }
+                pbar.update(1)
+                pbar.set_description(f'Training loss is {step_metrics["loss"]}')
+                #print(f'Training loss is {step_metrics["loss"]}', end='\r')
 
-            # Add to epoch's metrics
-            for k,v in step_metrics.items():
-                epoch_metrics[k].append(v)
+                # Add to epoch's metrics
+                for k,v in step_metrics.items():
+                    epoch_metrics[k].append(v)
 
         # Return metrics
         return epoch_metrics
@@ -91,7 +94,7 @@ class Trainer:
 
         # Create a progress bar using TQDM
         stdout.flush()
-        with no_grad():
+        with no_grad(), tqdm(total=dl.__len__(), leave=True) as pbar:
             # Iterate over the validation dataloader
             for inputs, truths in dl:
                  # Move the inputs and truths to the target device
@@ -114,6 +117,8 @@ class Trainer:
                 for i in range(len(output)):
                     out.append(output[i].cpu().numpy())
                     tru.append(truths[i].cpu().numpy())
+                
+                pbar.update(1)
 
         stdout.flush()
 
@@ -149,7 +154,7 @@ class Trainer:
 
             metrics_val, _, _ = self.val_epoch(dl_val)
             df_val = df_val.append(DataFrame({'epoch': [epoch], **metrics_val}), ignore_index=True)
-            print(f'Epoch {epoch} completed', end='\r')
+            print(f'Epoch {epoch} completed')
             
             if metrics_val["loss"][0] < best_loss:
                 best_loss = metrics_val["loss"][0]

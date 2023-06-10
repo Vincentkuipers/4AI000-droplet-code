@@ -36,7 +36,7 @@ test_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True)
 # Get the model
 model = CNNModel3()
 trainer = Trainer(model, train_dataloader, val_dataloader, test_dataloader)
-trainer.load_model("last_model.pt", "savefolderpytorch")
+trainer.load_model("last_model2.pt", "savefolderpytorch")
 
-trainer.fit(epochs=3, batch_size= BATCH_SIZE)
+trainer.fit(epochs=10, batch_size= BATCH_SIZE)
 trainer.save_model("last_model.pt", "savefolderpytorch")

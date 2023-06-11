@@ -93,7 +93,8 @@ class CNNModel3(nn.Module):
         self.relu1 = nn.LeakyReLU()
         self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
         
-        self.conv2 = nn.Conv2d(8, 16, kernel_size=5, stride=1, padding=1)
+        self.conv2 = nn.Sequential(nn.Conv2d(8, 16, kernel_size=5, stride=1, padding=1),
+                                        nn.BatchNorm2d(16))
         self.relu2 = nn.LeakyReLU()
         self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
         
@@ -101,7 +102,8 @@ class CNNModel3(nn.Module):
         self.relu3 = nn.LeakyReLU()
         self.pool3 = nn.MaxPool2d(kernel_size=2, stride=2)
 
-        self.conv4 = nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1)
+        self.conv4 = nn.Sequential(nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1),
+                                      nn.BatchNorm2d(32))
         self.relu4 = nn.LeakyReLU()
         self.pool4 = nn.MaxPool2d(kernel_size=2, stride=2)
          
@@ -110,7 +112,7 @@ class CNNModel3(nn.Module):
 
         # Define the fully connected layers
         self.fc1 = nn.LazyLinear(64)
-        self.relu4 = nn.Tanh()
+        self.relu4 = nn.LeakyReLU()
         self.fc2 = nn.Linear(64, 64)
         self.relu5 = nn.LeakyReLU()
         self.fc3 = nn.Linear(64, 64)

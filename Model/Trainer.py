@@ -4,7 +4,7 @@ from torch.nn.utils import clip_grad_value_
 from torch.utils.data import DataLoader
 from torch.nn import Module, MSELoss
 from torch.optim import Adam
-from pandas import DataFrame
+from pandas import DataFrame, read_csv
 from os.path import join
 from sys import stdout
 from os import getcwd
@@ -134,20 +134,29 @@ class Trainer:
             "loss": [total_loss],
         }, out, tru
 
-    def fit(self, epochs: int, batch_size:int):
+    def fit(self, epochs: int, batch_size:int, continue_training:bool=False):
         # Initialize Dataloaders for the `train` and `val` splits of the dataset. 
         # A Dataloader loads a batch of samples from the each dataset split and concatenates these samples into a batch.
         dl_train = self.train
         dl_val = self.val
 
         # Store metrics of the training process (plot this to gain insight)
-        df_train = DataFrame()
-        df_val = DataFrame()
-
-        best_loss:float = 1000000000
+        if not continue_training: # Not -> create new dataframe
+            df_train = DataFrame() 
+            df_val = DataFrame()
+            # set base line for best loss
+            epoch_add = 0
+            best_loss:float = 1000000000
+        else: # Yes -> load dataframe
+            df_train = read_csv('savefolderpytorch\\train.csv')
+            df_val = read_csv('savefolderpytorch\\val.csv')
+            # Set base line for best loss
+            epoch_add = df_train['epoch'].max()
+            best_loss:float = df_val["loss"].min()
+        
 
         # Train the model for the provided amount of epochs
-        for epoch in range(1, epochs+1):
+        for epoch in range(epoch_add+1, epoch_add+epochs+1):
             print(f'Epoch {epoch}', end='\r')
             metrics_train = self.train_epoch(dl_train)
             df_train = df_train.append(DataFrame({'epoch': [epoch for _ in range(len(metrics_train["loss"]))], **metrics_train}), ignore_index=True)

@@ -10,7 +10,7 @@ from warnings import simplefilter
 simplefilter(action='ignore', category=UserWarning)
 simplefilter(action='ignore', category=FutureWarning)
 
-BATCH_SIZE = 32
+BATCH_SIZE = 8
 MAIN_DIR = os.path.abspath(os.path.join(os.getcwd(), ".."))
 DATA_DIR = os.path.join(MAIN_DIR, "Solid_droplet", "Data")
 
@@ -40,3 +40,10 @@ trainer.load_model("best_model.pt", "savefolderpytorch")
 
 trainer.fit(epochs=10, batch_size=BATCH_SIZE, continue_training=False)
 trainer.save_model("last_model.pt", "savefolderpytorch")
+
+trainer.load_model("best_model.pt", "savefolderpytorch")  
+_, output, labels = trainer.val_epoch(test_dataloader)
+dfresults = pd.DataFrame(np.append(output, labels, axis=1),columns=["sigmapred", "sigmatrue"])
+dfresults["RMSE"] = np.sqrt((dfresults["sigmapred"]-dfresults["sigmatrue"])**2)
+print(dfresults)
+dfresults.to_csv("savefolderpytorch\\results.csv", index=False)

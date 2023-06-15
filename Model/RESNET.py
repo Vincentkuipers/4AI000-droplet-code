@@ -178,7 +178,7 @@ class RESNET50(nn.Module):
         # To finish resnet50 do this
         self.averagepool = nn.AdaptiveAvgPool2d(kernel_size=(1,1))
         self.flatten = nn.Flatten()
-        self.fc = nn.LazyLinear(out_features=out_features, bias=True)
+        self.fc = nn.LazyLinear(out_features=out_features, bias=bias)
 
     def forward(self, x):
         """Forward Pass of the ResNet50 model"""

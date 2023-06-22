@@ -22,10 +22,10 @@ class Trainer:
                 dlval: The dataloader for the validation set
                 dltest: The dataloader for the test set
         """
-        self.device = device("cuda" if is_available() else "cpu")
+        self.device = device("cpu")
         print(f"The device that will be used in training is {get_device_name(self.device)}")
 
-        self.model = model.to(self.device).float()
+        self.model = model.float()
 
         self.train = dltrain
         self.val = dlval

@@ -12,7 +12,8 @@ except:
 try:
     CODE_PATH = getcwd()
     BLEND_BLEND_FILE = path.join(CODE_PATH, "empty.blend")
-    BLEND_FILE_CODE = path.join(CODE_PATH, "CurrentBlenderCode.py")
+    #BLEND_FILE_CODE = path.join(CODE_PATH, "CurrentBlenderCode.py")
+    BLEND_FILE_CODE = path.join(CODE_PATH, "NOBackgroundBlenderCode.py")
     print("Files were found")
 except:
     raise NameError("File has not been found check if file is correct")

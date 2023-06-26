@@ -3,10 +3,11 @@ from torch.utils.data import Dataset
 from torch.cuda import is_available
 from random import seed, shuffle
 from numpy import asarray, array
+from PIL import Image, ImageFile
 from os import listdir, path
-from PIL import Image
 
-
+# ensures that truncated images are still loaded
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 class CustomImageDataset(Dataset):
     """Custom dataset for loading images and labels"""
@@ -16,9 +17,18 @@ class CustomImageDataset(Dataset):
         self.device = device("cuda" if is_available() else "cpu")
 
     def __len__(self):
+        """Return length of dataset"""	
         return len(self.file_list)
 
     def __getitem__(self, idx):
+        """Return image and label
+        
+        Args:
+            idx (int): index of image
+        Returns:
+            image (tensor): image
+            label (tensor): label
+        """
         filename = self.file_list[idx]
         image_path = path.join(self.root_dir, filename)
 
@@ -35,8 +45,26 @@ class CustomImageDataset(Dataset):
 
 
 class DataSpliter():
-    """Class for loading images and the labels"""
+    """Class for splitting images and the labels into correct sets"""
     def __init__(self, DATA_DIR:list, device:str, train_frac:float = 0.6, val_frac:float = 0.2, test_frac:float=0.2, use_seed:bool=False, seed_val:int=42):
+        """Split data into train, validation and test set
+        
+        Args:
+            DATA_DIR (str): list of data directories
+            device (str): device to store data
+            train_frac (float, optional): fraction of train set. Defaults to 0.6.
+            val_frac (float, optional): fraction of validation set. Defaults to 0.2.
+            test_frac (float, optional): fraction of test set. Defaults to 0.2.
+            use_seed (bool, optional): use seed for shuffling data. Defaults to False.
+            seed_val (int, optional): seed value. Defaults to 42.
+            
+        Raises:
+            ValueError: if sum of train_frac, val_frac and test_frac is not 1
+            ValueError: if train_frac, val_frac and test_frac are greater than 1
+            
+        Returns:
+            None -> All data is stored in self.train, self.val and self.test
+        """
         self.device = device
         # Split the data into train, validation and test set
         train, val, test = self._split_data(DATA_DIR, train_frac, val_frac, test_frac, use_seed, seed_val)
@@ -48,7 +76,25 @@ class DataSpliter():
     
 
     def _split_data(self, DATA_DIR:list, train_frac:float = 0.6, val_frac:float = 0.2, test_frac:float=0.2, use_seed:bool=False, seed_val:int=42):
-        """Split data into train, validation and test set"""
+        """Split data into train, validation and test set
+        
+        Args:
+            DATA_DIR (str): list of data directories
+            train_frac (float, optional): fraction of train set. Defaults to 0.6.
+            val_frac (float, optional): fraction of validation set. Defaults to 0.2.
+            test_frac (float, optional): fraction of test set. Defaults to 0.2.
+            use_seed (bool, optional): use seed for shuffling data. Defaults to False.
+            seed_val (int, optional): seed value. Defaults to 42.
+        
+        Raises:
+            ValueError: if sum of train_frac, val_frac and test_frac is not 1
+            ValueError: if train_frac, val_frac and test_frac are greater than 1
+            
+        Returns:
+            train_split (list): list of train data
+            val_split (list): list of validation data
+            test_split (list): list of test data
+        """
 
         # Check if sum of train_frac, val_frac and test_frac is 1
         if train_frac + val_frac + test_frac != 1:

@@ -1,6 +1,6 @@
 from cv2 import imread, resize, cvtColor, COLOR_BGR2GRAY
 from random import seed, shuffle
-from numpy import array, float16, empty, float32
+from numpy import array, float16, empty
 from os import listdir, path
 
 
@@ -111,4 +111,4 @@ class DataSpliter():
             image = self._image_processing(image, size=im_size)
             images[i,:,:] = image
         
-        return images #permute(images, (3,2,0,1)) 
+        return images #

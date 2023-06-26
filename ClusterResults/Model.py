@@ -1,5 +1,43 @@
 from torch import nn
 
+# This file contains the model architecture for the CNN model. To create your own model use the following template:
+# class CNNModel(nn.Module):
+#     def __init__(self, out_features:int=1):
+#         super(CNNModel, self).__init__()
+#
+#         # Define the convolutional layers
+#         self.conv1 = nn.Conv2d(3, 4, kernel_size=3, stride=1, padding=1)
+#         self.relu1 = nn.ReLU()
+#
+#         # Flatten the layers
+#         self.flatten = nn.Flatten()
+#
+#         # Define the fully connected layers
+#         self.fc1 = nn.LazyLinear(64) # Use lazy to not have to infer the input size if you use this include warnings.filterwarnings("ignore") since it will throw a warning which is not important
+#         self.relu2 = nn.ReLU()
+#         self.fc2 = nn.Linear(64, out_features=out_features)
+#
+#     def forward(self, x):
+#         # Apply the convolutional layers
+#         x = self.relu1(self.conv1(x))
+#
+#         # Flatten the tensor for the fully connected layers
+#         x = self.flatten(x)
+#
+#         # Apply the fully connected layers
+#         x = self.relu2(self.fc1(x))
+#         x = self.fc2(x)
+#
+#         return x
+
+# Tips:
+# - Use nn.Sequential to create a sequential model
+# - Use nn.BatchNorm2d to normalize the data
+# - Use nn.MaxPool2d to downsample the data
+# - Use nn.Dropout2d to dropout data
+# - Use nn.LeakyReLU to use leaky relu activation function (slightly better than relu since you don't throw away data)
+# - Use nn.Softmax to use softmax activation function
+
 class CNNModel(nn.Module):
     def __init__(self, out_features:int=1):
         super(CNNModel, self).__init__()
